@@ -103,6 +103,9 @@ export function Dashboard({ session }: DashboardProps) {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Admissions */}
+        <AdmissionsList userId={session.user.id} />
       </main>
 
       <EditProfileDialog
