@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, User, Calendar, Activity, TrendingUp } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { AdmissionsList } from "@/components/AdmissionsList";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -102,6 +103,9 @@ export function Dashboard({ session }: DashboardProps) {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Admissions */}
+        <AdmissionsList userId={session.user.id} />
       </main>
 
       <EditProfileDialog
