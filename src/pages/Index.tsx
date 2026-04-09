@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { PhoneLoginForm } from "@/components/PhoneLoginForm";
+import { Dashboard } from "@/components/Dashboard";
 import type { Session } from "@supabase/supabase-js";
 
 const Index = () => {
@@ -22,33 +23,16 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
   if (loading) return null;
+
+  if (session) {
+    return <Dashboard session={session} />;
+  }
 
   return (
     <BackgroundGradientAnimation>
       <div className="absolute z-50 inset-0 flex items-center justify-center px-4">
-        {session ? (
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-300">
-              hello
-            </h1>
-            <p className="text-neutral-400">
-              Signed in as {session.user.phone}
-            </p>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-neutral-400 hover:text-neutral-200 underline transition-colors"
-            >
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <PhoneLoginForm />
-        )}
+        <PhoneLoginForm />
       </div>
     </BackgroundGradientAnimation>
   );
