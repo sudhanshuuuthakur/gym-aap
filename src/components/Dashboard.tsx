@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, User, Calendar, Activity, TrendingUp } from "lucide-react";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -11,6 +12,7 @@ interface DashboardProps {
 
 export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
 
   useEffect(() => {
     supabase
@@ -92,7 +94,7 @@ export function Dashboard({ session }: DashboardProps) {
             <CardTitle className="text-neutral-200">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
+            <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800" onClick={() => setEditOpen(true)}>
               Edit Profile
             </Button>
             <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
@@ -101,6 +103,14 @@ export function Dashboard({ session }: DashboardProps) {
           </CardContent>
         </Card>
       </main>
+
+      <EditProfileDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        userId={session.user.id}
+        currentDisplayName={displayName}
+        onSaved={(name) => setDisplayName(name)}
+      />
     </div>
   );
 }
