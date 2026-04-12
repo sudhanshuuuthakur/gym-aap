@@ -21,6 +21,7 @@ export type Database = {
           email: string | null
           height: number | null
           id: string
+          join_date: string | null
           name: string
           phone: string | null
           status: string
@@ -34,6 +35,7 @@ export type Database = {
           email?: string | null
           height?: number | null
           id?: string
+          join_date?: string | null
           name: string
           phone?: string | null
           status?: string
@@ -47,6 +49,7 @@ export type Database = {
           email?: string | null
           height?: number | null
           id?: string
+          join_date?: string | null
           name?: string
           phone?: string | null
           status?: string

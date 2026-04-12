@@ -1,0 +1,1 @@
+ALTER TABLE public.admissions ADD COLUMN join_date date NULL;
