@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, User, Calendar, Activity, TrendingUp } from "lucide-react";
+import { LogOut, User, Dumbbell, Settings } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { AdmissionsList } from "@/components/AdmissionsList";
 import { MembershipStats } from "@/components/MembershipStats";
@@ -31,15 +31,8 @@ export function Dashboard({ session }: DashboardProps) {
     await supabase.auth.signOut();
   };
 
-  const phone = session.user.user_metadata?.phone || "User";
+  const phone = session.user.user_metadata?.phone || "Owner";
   const greeting = displayName || phone;
-  const joinDate = new Date(session.user.created_at).toLocaleDateString();
-
-  const stats = [
-    { label: "Status", value: "Active", icon: Activity, color: "text-emerald-400" },
-    { label: "Joined", value: joinDate, icon: Calendar, color: "text-blue-400" },
-    { label: "Sessions", value: "1", icon: TrendingUp, color: "text-amber-400" },
-  ];
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950">
@@ -48,67 +41,50 @@ export function Dashboard({ session }: DashboardProps) {
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
-              <User className="h-4 w-4 text-primary-foreground" />
+              <Dumbbell className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="text-sm font-medium text-neutral-200">{greeting}</span>
+            <div>
+              <span className="text-sm font-semibold text-neutral-100">Gym Manager</span>
+              <p className="text-xs text-neutral-500">{greeting}</p>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="text-neutral-400 hover:text-neutral-100"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditOpen(true)}
+              className="text-neutral-400 hover:text-neutral-100"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-neutral-400 hover:text-neutral-100"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-5xl px-6 py-10 space-y-8">
+      <main className="mx-auto max-w-5xl px-6 py-8 space-y-6">
+        {/* Greeting */}
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
-            Welcome, {greeting}
+          <h1 className="text-2xl font-bold text-neutral-100">
+            👋 Hi, {greeting}
           </h1>
-          <p className="mt-1 text-neutral-500">Here's your dashboard overview</p>
+          <p className="mt-1 text-sm text-neutral-500">
+            Here's how your gym is doing today
+          </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {stats.map((stat) => (
-            <Card key={stat.label} className="border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-neutral-400">
-                  {stat.label}
-                </CardTitle>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <p className="text-xl font-semibold text-neutral-100">{stat.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Quick actions */}
-        <Card className="border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-neutral-200">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800" onClick={() => setEditOpen(true)}>
-              Edit Profile
-            </Button>
-            <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-800">
-              Settings
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Membership Stats */}
+        {/* Membership Overview — TOP PRIORITY */}
         <MembershipStats userId={session.user.id} />
 
-        {/* Admissions */}
+        {/* Members List */}
         <AdmissionsList userId={session.user.id} />
       </main>
 
