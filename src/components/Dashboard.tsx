@@ -105,6 +105,9 @@ export function Dashboard({ session }: DashboardProps) {
           </CardContent>
         </Card>
 
+        {/* Membership Stats */}
+        <MembershipStats userId={session.user.id} />
+
         {/* Admissions */}
         <AdmissionsList userId={session.user.id} />
       </main>
