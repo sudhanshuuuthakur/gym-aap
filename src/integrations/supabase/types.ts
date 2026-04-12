@@ -16,34 +16,43 @@ export type Database = {
     Tables: {
       admissions: {
         Row: {
+          age: number | null
           created_at: string
           email: string | null
+          height: number | null
           id: string
           name: string
           phone: string | null
           status: string
           updated_at: string
           user_id: string
+          weight: number | null
         }
         Insert: {
+          age?: number | null
           created_at?: string
           email?: string | null
+          height?: number | null
           id?: string
           name: string
           phone?: string | null
           status?: string
           updated_at?: string
           user_id: string
+          weight?: number | null
         }
         Update: {
+          age?: number | null
           created_at?: string
           email?: string | null
+          height?: number | null
           id?: string
           name?: string
           phone?: string | null
           status?: string
           updated_at?: string
           user_id?: string
+          weight?: number | null
         }
         Relationships: []
       }
