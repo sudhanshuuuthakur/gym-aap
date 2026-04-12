@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { UserPlus } from "lucide-react";
+import { UserPlus, CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AddAdmissionDialogProps {
   open: boolean;
@@ -27,6 +31,7 @@ export function AddAdmissionDialog({
 }: AddAdmissionDialogProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [joinDate, setJoinDate] = useState<Date | undefined>(new Date());
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
@@ -47,6 +52,7 @@ export function AddAdmissionDialog({
       user_id: userId,
       name: name.trim(),
       phone: phone.trim(),
+      join_date: joinDate ? format(joinDate, "yyyy-MM-dd") : null,
       height: height ? parseFloat(height) : null,
       weight: weight ? parseFloat(weight) : null,
       age: age ? parseInt(age, 10) : null,
@@ -59,6 +65,7 @@ export function AddAdmissionDialog({
       toast.success("Member added!");
       setName("");
       setPhone("");
+      setJoinDate(new Date());
       setHeight("");
       setWeight("");
       setAge("");
@@ -97,6 +104,33 @@ export function AddAdmissionDialog({
               placeholder="+91 98765 43210"
               className={inputClass}
             />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-neutral-400">Date of Joining</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    inputClass,
+                    !joinDate && "text-neutral-500"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {joinDate ? format(joinDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 border-neutral-700 bg-neutral-900" align="start">
+                <Calendar
+                  mode="single"
+                  selected={joinDate}
+                  onSelect={setJoinDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <p className="text-xs text-neutral-500 pt-1">Optional details</p>
