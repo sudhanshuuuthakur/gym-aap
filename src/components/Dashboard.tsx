@@ -6,6 +6,7 @@ import { BottomNav, type Screen } from "@/components/BottomNav";
 import { HomeScreen } from "@/components/screens/HomeScreen";
 import { MembersScreen } from "@/components/screens/MembersScreen";
 import { InfoScreen } from "@/components/screens/InfoScreen";
+import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -45,7 +46,14 @@ export function Dashboard({ session }: DashboardProps) {
 
       {/* Screen Content */}
       <main className="mx-auto max-w-5xl px-6 py-8 pb-24">
-        {screen === "home" && <HomeScreen userId={session.user.id} greeting={greeting} />}
+        {screen === "home" && (
+          <HomeScreen
+            userId={session.user.id}
+            greeting={greeting}
+            onAttendance={() => setScreen("attendance")}
+          />
+        )}
+        {screen === "attendance" && <AttendanceScreen userId={session.user.id} />}
         {screen === "members" && <MembersScreen userId={session.user.id} />}
         {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
       </main>

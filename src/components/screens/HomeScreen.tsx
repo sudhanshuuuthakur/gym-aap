@@ -5,6 +5,7 @@ interface HomeScreenProps {
   userId: string;
   greeting: string;
   onAddMember?: () => void;
+  onAttendance?: () => void;
 }
 
 const quickActions = [
@@ -13,9 +14,10 @@ const quickActions = [
   { id: "collect-payment", label: "Collect Payment", icon: Wallet, color: "from-amber-500/20 to-amber-600/10 border-amber-500/30 text-amber-400" },
 ];
 
-export function HomeScreen({ userId, greeting, onAddMember }: HomeScreenProps) {
+export function HomeScreen({ userId, greeting, onAddMember, onAttendance }: HomeScreenProps) {
   const handleAction = (id: string) => {
     if (id === "add-member" && onAddMember) onAddMember();
+    if (id === "attendance" && onAttendance) onAttendance();
   };
 
   return (
