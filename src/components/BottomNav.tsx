@@ -1,7 +1,7 @@
 import { Home, Users, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type Screen = "home" | "members" | "info";
+export type Screen = "home" | "members" | "info" | "attendance";
 
 interface BottomNavProps {
   active: Screen;
