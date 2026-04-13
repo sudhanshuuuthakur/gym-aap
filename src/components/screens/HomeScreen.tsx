@@ -38,9 +38,9 @@ export function HomeScreen({ userId, greeting, onAddMember }: HomeScreenProps) {
             <button
               key={action.id}
               onClick={() => handleAction(action.id)}
-              className={`${isWide ? "col-span-2" : ""} flex flex-col items-center justify-center gap-2 rounded-2xl border bg-gradient-to-br aspect-square p-6 transition-transform active:scale-[0.97] ${action.color}`}
+              className={`${isWide ? "col-span-2" : ""} flex flex-col items-center justify-center gap-2 rounded-2xl border bg-gradient-to-br h-28 p-6 transition-transform active:scale-[0.97] ${action.color}`}
             >
-              <Icon className="h-10 w-10 shrink-0" />
+              <Icon className="h-8 w-8 shrink-0" />
               <span className="text-sm font-semibold text-neutral-100">{action.label}</span>
             </button>
           );
