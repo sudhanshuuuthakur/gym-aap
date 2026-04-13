@@ -38,10 +38,10 @@ export function HomeScreen({ userId, greeting, onAddMember }: HomeScreenProps) {
             <button
               key={action.id}
               onClick={() => handleAction(action.id)}
-              className={`${isWide ? "col-span-2" : ""} flex items-center gap-3 rounded-2xl border bg-gradient-to-br p-5 transition-transform active:scale-[0.97] ${action.color}`}
+              className={`${isWide ? "col-span-2" : ""} flex flex-col items-center justify-center gap-2 rounded-2xl border bg-gradient-to-br aspect-square p-6 transition-transform active:scale-[0.97] ${action.color}`}
             >
-              <Icon className="h-7 w-7 shrink-0" />
-              <span className="text-base font-semibold text-neutral-100">{action.label}</span>
+              <Icon className="h-10 w-10 shrink-0" />
+              <span className="text-sm font-semibold text-neutral-100">{action.label}</span>
             </button>
           );
         })}
