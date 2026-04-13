@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, User, Dumbbell, Settings } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
-import { AdmissionsList } from "@/components/AdmissionsList";
-import { MembershipStats } from "@/components/MembershipStats";
+import { BottomNav, type Screen } from "@/components/BottomNav";
+import { HomeScreen } from "@/components/screens/HomeScreen";
+import { MembersScreen } from "@/components/screens/MembersScreen";
+import { InfoScreen } from "@/components/screens/InfoScreen";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -15,6 +15,7 @@ interface DashboardProps {
 export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [screen, setScreen] = useState<Screen>("home");
 
   useEffect(() => {
     supabase
@@ -27,10 +28,6 @@ export function Dashboard({ session }: DashboardProps) {
       });
   }, [session.user.id]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
   const phone = session.user.user_metadata?.phone || "Owner";
   const greeting = displayName || phone;
 
@@ -38,55 +35,23 @@ export function Dashboard({ session }: DashboardProps) {
     <div className="min-h-screen w-full bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950">
       {/* Header */}
       <header className="border-b border-neutral-800 bg-neutral-950/60 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
-              <Dumbbell className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-neutral-100">Gym Manager</span>
-              <p className="text-xs text-neutral-500">{greeting}</p>
-            </div>
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
+            <Dumbbell className="h-4 w-4 text-primary-foreground" />
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditOpen(true)}
-              className="text-neutral-400 hover:text-neutral-100"
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="text-neutral-400 hover:text-neutral-100"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
+          <span className="text-sm font-semibold text-neutral-100">Gym Manager</span>
         </div>
       </header>
 
-      {/* Content */}
-      <main className="mx-auto max-w-5xl px-6 py-8 space-y-6">
-        {/* Greeting */}
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-100">
-            👋 Hi, {greeting}
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Here's how your gym is doing today
-          </p>
-        </div>
-
-        {/* Membership Overview — TOP PRIORITY */}
-        <MembershipStats userId={session.user.id} />
-
-        {/* Members List */}
-        <AdmissionsList userId={session.user.id} />
+      {/* Screen Content */}
+      <main className="mx-auto max-w-5xl px-6 py-8 pb-24">
+        {screen === "home" && <HomeScreen userId={session.user.id} greeting={greeting} />}
+        {screen === "members" && <MembersScreen userId={session.user.id} />}
+        {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav active={screen} onChange={setScreen} />
 
       <EditProfileDialog
         open={editOpen}
