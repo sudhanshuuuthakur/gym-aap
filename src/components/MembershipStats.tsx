@@ -82,42 +82,46 @@ export function MembershipStats({ userId }: MembershipStatsProps) {
       <CardContent className="space-y-6">
         {/* Big number summary - clickable */}
         <div className="grid grid-cols-3 gap-4 text-center">
-          <button
-            onClick={() => toggle("all")}
-            className="rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 transition-colors hover:bg-neutral-800/60 text-left"
-          >
-            <p className="text-3xl font-bold text-neutral-100 text-center">{total}</p>
-            <p className="mt-1 text-xs text-neutral-400 text-center flex items-center justify-center gap-1">
-              Total Members
-              {expandedSection === "all" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </p>
-          </button>
-          <button
-            onClick={() => toggle("paid")}
-            className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 transition-colors hover:bg-emerald-500/10 text-left"
-          >
-            <p className="text-3xl font-bold text-emerald-400 text-center">{paid}</p>
-            <p className="mt-1 text-xs text-emerald-400/70 text-center flex items-center justify-center gap-1">
-              Paid ✅
-              {expandedSection === "paid" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </p>
-          </button>
-          <button
-            onClick={() => toggle("notpaid")}
-            className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 transition-colors hover:bg-amber-500/10 text-left"
-          >
-            <p className="text-3xl font-bold text-amber-400 text-center">{pending}</p>
-            <p className="mt-1 text-xs text-amber-400/70 text-center flex items-center justify-center gap-1">
-              Not Paid ⏳
-              {expandedSection === "notpaid" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-            </p>
-          </button>
+          <div>
+            <button
+              onClick={() => toggle("all")}
+              className="w-full rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 transition-colors hover:bg-neutral-800/60"
+            >
+              <p className="text-3xl font-bold text-neutral-100">{total}</p>
+              <p className="mt-1 text-xs text-neutral-400 flex items-center justify-center gap-1">
+                Total Members
+                {expandedSection === "all" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </p>
+            </button>
+            {expandedSection === "all" && <MemberList list={members} />}
+          </div>
+          <div>
+            <button
+              onClick={() => toggle("paid")}
+              className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 transition-colors hover:bg-emerald-500/10"
+            >
+              <p className="text-3xl font-bold text-emerald-400">{paid}</p>
+              <p className="mt-1 text-xs text-emerald-400/70 flex items-center justify-center gap-1">
+                Paid ✅
+                {expandedSection === "paid" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </p>
+            </button>
+            {expandedSection === "paid" && <MemberList list={paidMembers} showDot={false} />}
+          </div>
+          <div>
+            <button
+              onClick={() => toggle("notpaid")}
+              className="w-full rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 transition-colors hover:bg-amber-500/10"
+            >
+              <p className="text-3xl font-bold text-amber-400">{pending}</p>
+              <p className="mt-1 text-xs text-amber-400/70 flex items-center justify-center gap-1">
+                Not Paid ⏳
+                {expandedSection === "notpaid" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </p>
+            </button>
+            {expandedSection === "notpaid" && <MemberList list={pendingMembers} showDot={false} />}
+          </div>
         </div>
-
-        {/* Expandable member lists */}
-        {expandedSection === "all" && <MemberList list={members} />}
-        {expandedSection === "paid" && <MemberList list={paidMembers} showDot={false} />}
-        {expandedSection === "notpaid" && <MemberList list={pendingMembers} showDot={false} />}
 
         {/* Progress bars */}
         <div className="space-y-4">
