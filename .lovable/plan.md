@@ -1,13 +1,31 @@
 
 
-## Plan: Medium-sized quick action buttons
+## Plan: Total Members screen with professional design
 
-The current buttons use `aspect-square` making them too tall. I'll remove `aspect-square` and use a fixed height (`h-28`) with horizontal layout to create a comfortable, medium-sized rectangular button — not too big, not too small.
+Clicking the "Total Members" card in Membership Overview navigates to a dedicated full-screen member list. Each member row shows a green or red dot on the right based on payment status.
 
-### Changes to `src/components/screens/HomeScreen.tsx`:
-- Remove `aspect-square` from button classes
-- Add `h-28` for a moderate fixed height
-- Keep `rounded-2xl`, gradient backgrounds, and the 2-column grid layout
-- Keep icon size at `h-8 w-8` (slightly smaller than current `h-10 w-10`)
-- "Collect Payment" still spans full width but with the same moderate height
+### Changes
+
+**1. Add `"member-list"` to Screen type in `src/components/BottomNav.tsx`**
+- Add to the type union (not to the visible nav tabs)
+
+**2. Create `src/components/screens/MemberListScreen.tsx`**
+- Props: `userId`, `onBack`
+- Fetches all admissions for the user
+- Professional header with back arrow, title "Total Members", and member count badge
+- Search bar to filter by name
+- Clean list with subtle card styling per row: member name on left, green dot (paid/approved) or red dot (pending) on right
+- Empty state if no members
+
+**3. Update `src/components/MembershipStats.tsx`**
+- Accept new `onViewAllMembers` callback prop
+- Wire the "Total Members" card click to call `onViewAllMembers()` instead of toggling inline list
+- Keep Paid and Not Paid inline expansion as-is (only Total Members navigates)
+
+**4. Update `src/components/screens/HomeScreen.tsx`**
+- Accept and pass `onViewAllMembers` prop down to `MembershipStats`
+
+**5. Update `src/components/Dashboard.tsx`**
+- Add `member-list` screen rendering with `MemberListScreen`
+- Pass `onViewAllMembers` callback to `HomeScreen` that sets screen to `"member-list"`
 
