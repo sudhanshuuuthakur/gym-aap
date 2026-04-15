@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Users } from "lucide-react";
+import { ArrowLeft, Search, Users, CheckCircle2, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
+
+export type MemberFilter = "all" | "paid" | "notpaid";
 
 interface Member {
   id: string;
@@ -12,10 +14,17 @@ interface Member {
 
 interface MemberListScreenProps {
   userId: string;
+  filter: MemberFilter;
   onBack: () => void;
 }
 
-export function MemberListScreen({ userId, onBack }: MemberListScreenProps) {
+const filterConfig = {
+  all: { title: "Total Members", icon: Users, accent: "text-neutral-300" },
+  paid: { title: "Paid Members", icon: CheckCircle2, accent: "text-emerald-400" },
+  notpaid: { title: "Unpaid Members", icon: Clock, accent: "text-red-400" },
+};
+
+export function MemberListScreen({ userId, filter, onBack }: MemberListScreenProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -32,9 +41,18 @@ export function MemberListScreen({ userId, onBack }: MemberListScreenProps) {
       });
   }, [userId]);
 
-  const filtered = members.filter((m) =>
+  const filteredByStatus = filter === "paid"
+    ? members.filter((m) => m.status === "approved")
+    : filter === "notpaid"
+      ? members.filter((m) => m.status === "pending")
+      : members;
+
+  const filtered = filteredByStatus.filter((m) =>
     m.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const config = filterConfig[filter];
+  const Icon = config.icon;
 
   return (
     <div className="space-y-5">
@@ -47,11 +65,11 @@ export function MemberListScreen({ userId, onBack }: MemberListScreenProps) {
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex-1">
-          <h1 className="text-xl font-bold text-neutral-100">Total Members</h1>
+          <h1 className={`text-xl font-bold ${config.accent}`}>{config.title}</h1>
         </div>
         <span className="flex items-center gap-1.5 rounded-full bg-neutral-800/60 px-3 py-1 text-xs font-medium text-neutral-300">
-          <Users className="h-3.5 w-3.5" />
-          {members.length}
+          <Icon className="h-3.5 w-3.5" />
+          {filteredByStatus.length}
         </span>
       </div>
 
@@ -71,9 +89,9 @@ export function MemberListScreen({ userId, onBack }: MemberListScreenProps) {
         <div className="py-12 text-center text-sm text-neutral-500">Loading members...</div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <Users className="mx-auto h-10 w-10 text-neutral-700" />
+          <Icon className="mx-auto h-10 w-10 text-neutral-700" />
           <p className="mt-3 text-sm text-neutral-500">
-            {search ? "No members match your search" : "No members yet"}
+            {search ? "No members match your search" : "No members in this category"}
           </p>
         </div>
       ) : (

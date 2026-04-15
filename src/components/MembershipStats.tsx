@@ -12,10 +12,10 @@ interface Member {
 
 interface MembershipStatsProps {
   userId: string;
-  onViewAllMembers?: () => void;
+  onViewMembers?: (filter: "all" | "paid" | "notpaid") => void;
 }
 
-export function MembershipStats({ userId, onViewAllMembers }: MembershipStatsProps) {
+export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<"all" | "paid" | "notpaid" | null>(null);
