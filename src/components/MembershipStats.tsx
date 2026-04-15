@@ -12,6 +12,7 @@ interface Member {
 
 interface MembershipStatsProps {
   userId: string;
+  onViewAllMembers?: () => void;
 }
 
 export function MembershipStats({ userId }: MembershipStatsProps) {

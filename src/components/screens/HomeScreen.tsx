@@ -6,6 +6,7 @@ interface HomeScreenProps {
   greeting: string;
   onAddMember?: () => void;
   onAttendance?: () => void;
+  onViewAllMembers?: () => void;
 }
 
 const quickActions = [
