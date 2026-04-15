@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dumbbell } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { BottomNav, type Screen } from "@/components/BottomNav";
 import { HomeScreen } from "@/components/screens/HomeScreen";
 import { MembersScreen } from "@/components/screens/MembersScreen";
@@ -17,8 +18,10 @@ interface DashboardProps {
 export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("home");
   const [memberFilter, setMemberFilter] = useState<"all" | "paid" | "notpaid">("all");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     supabase
