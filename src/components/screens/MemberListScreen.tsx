@@ -1,0 +1,113 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Search, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+
+interface Member {
+  id: string;
+  name: string;
+  status: string;
+  phone: string | null;
+}
+
+interface MemberListScreenProps {
+  userId: string;
+  onBack: () => void;
+}
+
+export function MemberListScreen({ userId, onBack }: MemberListScreenProps) {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("admissions")
+      .select("id, name, status, phone")
+      .eq("user_id", userId)
+      .order("name")
+      .then(({ data }) => {
+        if (data) setMembers(data);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  const filtered = members.filter((m) =>
+    m.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onBack}
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-xl font-bold text-neutral-100">Total Members</h1>
+        </div>
+        <span className="flex items-center gap-1.5 rounded-full bg-neutral-800/60 px-3 py-1 text-xs font-medium text-neutral-300">
+          <Users className="h-3.5 w-3.5" />
+          {members.length}
+        </span>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+        <Input
+          placeholder="Search members..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border-neutral-800 bg-neutral-900/60 pl-9 text-neutral-200 placeholder:text-neutral-600"
+        />
+      </div>
+
+      {/* Member List */}
+      {loading ? (
+        <div className="py-12 text-center text-sm text-neutral-500">Loading members...</div>
+      ) : filtered.length === 0 ? (
+        <div className="py-12 text-center">
+          <Users className="mx-auto h-10 w-10 text-neutral-700" />
+          <p className="mt-3 text-sm text-neutral-500">
+            {search ? "No members match your search" : "No members yet"}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {filtered.map((member) => {
+            const isPaid = member.status === "approved";
+            return (
+              <div
+                key={member.id}
+                className="flex items-center justify-between rounded-xl border border-neutral-800/60 bg-neutral-900/40 px-4 py-3.5 transition-colors hover:bg-neutral-800/40"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-neutral-100">
+                    {member.name}
+                  </p>
+                  {member.phone && (
+                    <p className="mt-0.5 text-xs text-neutral-500">{member.phone}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 pl-3">
+                  <span className="text-[10px] font-medium text-neutral-500">
+                    {isPaid ? "Paid" : "Unpaid"}
+                  </span>
+                  <span
+                    className={`h-3 w-3 shrink-0 rounded-full ${
+                      isPaid ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]"
+                    }`}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

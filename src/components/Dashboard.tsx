@@ -7,6 +7,7 @@ import { HomeScreen } from "@/components/screens/HomeScreen";
 import { MembersScreen } from "@/components/screens/MembersScreen";
 import { InfoScreen } from "@/components/screens/InfoScreen";
 import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
+import { MemberListScreen } from "@/components/screens/MemberListScreen";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -51,7 +52,11 @@ export function Dashboard({ session }: DashboardProps) {
             userId={session.user.id}
             greeting={greeting}
             onAttendance={() => setScreen("attendance")}
+            onViewAllMembers={() => setScreen("member-list")}
           />
+        )}
+        {screen === "member-list" && (
+          <MemberListScreen userId={session.user.id} onBack={() => setScreen("home")} />
         )}
         {screen === "attendance" && <AttendanceScreen userId={session.user.id} />}
         {screen === "members" && <MembersScreen userId={session.user.id} />}
