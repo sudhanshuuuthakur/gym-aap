@@ -85,7 +85,7 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <button
-              onClick={() => onViewAllMembers?.()}
+              onClick={() => onViewMembers?.("all")}
               className="w-full rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 transition-colors hover:bg-neutral-800/60"
             >
               <p className="text-3xl font-bold text-neutral-100">{total}</p>
@@ -97,29 +97,27 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
           </div>
           <div>
             <button
-              onClick={() => toggle("paid")}
+              onClick={() => onViewMembers?.("paid")}
               className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 transition-colors hover:bg-emerald-500/10"
             >
               <p className="text-3xl font-bold text-emerald-400">{paid}</p>
               <p className="mt-1 text-xs text-emerald-400/70 flex items-center justify-center gap-1">
                 Paid ✅
-                {expandedSection === "paid" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                <ChevronDown className="h-3 w-3" />
               </p>
             </button>
-            {expandedSection === "paid" && <MemberList list={paidMembers} showDot={false} />}
           </div>
           <div>
             <button
-              onClick={() => toggle("notpaid")}
+              onClick={() => onViewMembers?.("notpaid")}
               className="w-full rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 transition-colors hover:bg-amber-500/10"
             >
               <p className="text-3xl font-bold text-amber-400">{pending}</p>
               <p className="mt-1 text-xs text-amber-400/70 flex items-center justify-center gap-1">
                 Not Paid ⏳
-                {expandedSection === "notpaid" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                <ChevronDown className="h-3 w-3" />
               </p>
             </button>
-            {expandedSection === "notpaid" && <MemberList list={pendingMembers} showDot={false} />}
           </div>
         </div>
 

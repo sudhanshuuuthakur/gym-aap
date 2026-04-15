@@ -18,6 +18,7 @@ export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("home");
+  const [memberFilter, setMemberFilter] = useState<"all" | "paid" | "notpaid">("all");
 
   useEffect(() => {
     supabase
@@ -52,11 +53,11 @@ export function Dashboard({ session }: DashboardProps) {
             userId={session.user.id}
             greeting={greeting}
             onAttendance={() => setScreen("attendance")}
-            onViewAllMembers={() => setScreen("member-list")}
+            onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
           />
         )}
         {screen === "member-list" && (
-          <MemberListScreen userId={session.user.id} onBack={() => setScreen("home")} />
+          <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => setScreen("home")} />
         )}
         {screen === "attendance" && <AttendanceScreen userId={session.user.id} />}
         {screen === "members" && <MembersScreen userId={session.user.id} />}
