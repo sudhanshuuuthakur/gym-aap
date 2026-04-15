@@ -15,7 +15,7 @@ interface MembershipStatsProps {
   onViewAllMembers?: () => void;
 }
 
-export function MembershipStats({ userId }: MembershipStatsProps) {
+export function MembershipStats({ userId, onViewAllMembers }: MembershipStatsProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<"all" | "paid" | "notpaid" | null>(null);
@@ -85,16 +85,15 @@ export function MembershipStats({ userId }: MembershipStatsProps) {
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
             <button
-              onClick={() => toggle("all")}
+              onClick={() => onViewAllMembers?.()}
               className="w-full rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 transition-colors hover:bg-neutral-800/60"
             >
               <p className="text-3xl font-bold text-neutral-100">{total}</p>
               <p className="mt-1 text-xs text-neutral-400 flex items-center justify-center gap-1">
                 Total Members
-                {expandedSection === "all" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                <ChevronDown className="h-3 w-3" />
               </p>
             </button>
-            {expandedSection === "all" && <MemberList list={members} />}
           </div>
           <div>
             <button
