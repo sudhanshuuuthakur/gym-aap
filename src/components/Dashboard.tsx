@@ -53,8 +53,10 @@ export function Dashboard({ session }: DashboardProps) {
       <main className="mx-auto max-w-5xl px-6 py-8 pb-24">
         {screen === "home" && (
           <HomeScreen
+            key={refreshKey}
             userId={session.user.id}
             greeting={greeting}
+            onAddMember={() => setAddMemberOpen(true)}
             onAttendance={() => setScreen("attendance")}
             onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
           />
@@ -76,6 +78,13 @@ export function Dashboard({ session }: DashboardProps) {
         userId={session.user.id}
         currentDisplayName={displayName}
         onSaved={(name) => setDisplayName(name)}
+      />
+
+      <AddAdmissionDialog
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
+        userId={session.user.id}
+        onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>
   );
