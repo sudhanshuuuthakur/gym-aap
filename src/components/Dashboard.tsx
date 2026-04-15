@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dumbbell } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { BottomNav, type Screen } from "@/components/BottomNav";
 import { HomeScreen } from "@/components/screens/HomeScreen";
 import { MembersScreen } from "@/components/screens/MembersScreen";
@@ -17,8 +18,10 @@ interface DashboardProps {
 export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("home");
   const [memberFilter, setMemberFilter] = useState<"all" | "paid" | "notpaid">("all");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     supabase
@@ -50,8 +53,10 @@ export function Dashboard({ session }: DashboardProps) {
       <main className="mx-auto max-w-5xl px-6 py-8 pb-24">
         {screen === "home" && (
           <HomeScreen
+            key={refreshKey}
             userId={session.user.id}
             greeting={greeting}
+            onAddMember={() => setAddMemberOpen(true)}
             onAttendance={() => setScreen("attendance")}
             onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
           />
@@ -73,6 +78,13 @@ export function Dashboard({ session }: DashboardProps) {
         userId={session.user.id}
         currentDisplayName={displayName}
         onSaved={(name) => setDisplayName(name)}
+      />
+
+      <AddAdmissionDialog
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
+        userId={session.user.id}
+        onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>
   );
