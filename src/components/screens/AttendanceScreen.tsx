@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Circle, Search, CalendarDays, Users, UserCheck, UserX } from "lucide-react";
+import { CheckCircle2, Circle, Search, CalendarDays, Users, UserCheck, UserX, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -15,9 +15,10 @@ interface Member {
 
 interface AttendanceScreenProps {
   userId: string;
+  onBack: () => void;
 }
 
-export function AttendanceScreen({ userId }: AttendanceScreenProps) {
+export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [presentIds, setPresentIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -96,7 +97,12 @@ export function AttendanceScreen({ userId }: AttendanceScreenProps) {
     <div className="space-y-5">
       {/* Header */}
       <div className="rounded-2xl bg-gradient-to-br from-emerald-600/30 to-teal-700/20 border border-emerald-500/20 p-5">
-        <h1 className="text-2xl font-bold text-white">Attendance</h1>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="flex items-center justify-center h-8 w-8 rounded-full bg-neutral-800/60 hover:bg-neutral-700/60 transition-colors">
+            <ArrowLeft className="h-4 w-4 text-neutral-200" />
+          </button>
+          <h1 className="text-2xl font-bold text-white">Attendance</h1>
+        </div>
         <div className="mt-1 flex items-center gap-2 text-sm text-emerald-200/70">
           <CalendarDays className="h-4 w-4" />
           <span>{todayDisplay}</span>
