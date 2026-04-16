@@ -46,6 +46,10 @@ export function AddAdmissionDialog({
       toast.error("Phone number is required");
       return;
     }
+    if (!/^\d{10}$/.test(phone.trim())) {
+      toast.error("Phone number must be exactly 10 digits");
+      return;
+    }
 
     setLoading(true);
     const { error } = await supabase.from("admissions").insert({
@@ -100,8 +104,12 @@ export function AddAdmissionDialog({
             <Input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 98765 43210"
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                setPhone(val);
+              }}
+              placeholder="9876543210"
+              maxLength={10}
               className={inputClass}
             />
           </div>
