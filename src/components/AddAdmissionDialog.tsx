@@ -129,13 +129,25 @@ export function AddAdmissionDialog({
                   {joinDate ? format(joinDate, "PPP") : "Pick a date"}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 border-neutral-700 bg-neutral-900" align="start">
+              <PopoverContent className="w-auto p-0 border-neutral-700 bg-neutral-900 z-[9999]" align="start">
                 <Calendar
                   mode="single"
                   selected={joinDate}
                   onSelect={setJoinDate}
                   initialFocus
-                  className={cn("p-3 pointer-events-auto")}
+                  className={cn("p-3 pointer-events-auto text-neutral-100")}
+                  classNames={{
+                    caption_label: "text-sm font-medium text-neutral-100",
+                    nav_button: cn(
+                      "h-7 w-7 bg-neutral-800 border border-neutral-700 p-0 opacity-70 hover:opacity-100 hover:bg-neutral-700 text-neutral-100 inline-flex items-center justify-center rounded-md"
+                    ),
+                    head_cell: "text-neutral-400 rounded-md w-9 font-normal text-[0.8rem]",
+                    day: "h-9 w-9 p-0 font-normal text-neutral-200 hover:bg-neutral-700 rounded-md inline-flex items-center justify-center",
+                    day_selected: "bg-emerald-600 text-white hover:bg-emerald-500 focus:bg-emerald-600",
+                    day_today: "bg-neutral-700 text-neutral-100",
+                    day_outside: "text-neutral-600 opacity-50",
+                    day_disabled: "text-neutral-600 opacity-50",
+                  }}
                 />
               </PopoverContent>
             </Popover>
