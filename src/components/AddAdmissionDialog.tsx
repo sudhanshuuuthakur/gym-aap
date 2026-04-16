@@ -108,7 +108,7 @@ export function AddAdmissionDialog({
                 const val = e.target.value.replace(/\D/g, "").slice(0, 10);
                 setPhone(val);
               }}
-              placeholder="9876543210"
+              placeholder="10 digit number"
               maxLength={10}
               className={inputClass}
             />
