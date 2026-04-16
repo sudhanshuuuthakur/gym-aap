@@ -64,7 +64,7 @@ export function Dashboard({ session }: DashboardProps) {
         {screen === "member-list" && (
           <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => setScreen("home")} />
         )}
-        {screen === "attendance" && <AttendanceScreen userId={session.user.id} />}
+        {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => setScreen("home")} />}
         {screen === "members" && <MembersScreen userId={session.user.id} />}
         {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
       </main>
