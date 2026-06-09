@@ -94,6 +94,50 @@ export type Database = {
           },
         ]
       }
+      payments: {
+        Row: {
+          admission_id: string
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          notes: string | null
+          payment_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admission_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          method?: string
+          notes?: string | null
+          payment_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admission_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          notes?: string | null
+          payment_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_admission_id_fkey"
+            columns: ["admission_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
