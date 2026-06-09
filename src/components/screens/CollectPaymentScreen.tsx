@@ -1,0 +1,188 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { ArrowLeft, Search, Wallet, CheckCircle2, IndianRupee, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+
+interface Member {
+  id: string;
+  name: string;
+  phone: string | null;
+  status: string;
+}
+
+interface Payment {
+  admission_id: string;
+  amount: number;
+  payment_date: string;
+}
+
+interface Props {
+  userId: string;
+  onBack: () => void;
+}
+
+export function CollectPaymentScreen({ userId, onBack }: Props) {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [amounts, setAmounts] = useState<Record<string, string>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    const [m, p] = await Promise.all([
+      supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
+      (supabase as any).from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
+    ]);
+    if (m.data) setMembers(m.data);
+    if (p.data) setPayments(p.data as Payment[]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [userId]);
+
+  const latestPayment = (id: string) => payments.find((p) => p.admission_id === id);
+  const totalCollected = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
+
+  const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
+
+  const handleCollect = async (member: Member) => {
+    const raw = amounts[member.id];
+    const amount = Number(raw);
+    if (!raw || isNaN(amount) || amount <= 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    setSavingId(member.id);
+    const { error } = await (supabase as any).from("payments").insert({
+      user_id: userId,
+      admission_id: member.id,
+      amount,
+      payment_date: new Date().toISOString().slice(0, 10),
+      method: "cash",
+    });
+    if (error) {
+      toast.error(error.message);
+      setSavingId(null);
+      return;
+    }
+    if (member.status !== "approved") {
+      await supabase.from("admissions").update({ status: "approved" }).eq("id", member.id);
+    }
+    toast.success(`₹${amount} collected from ${member.name}`);
+    setAmounts((a) => ({ ...a, [member.id]: "" }));
+    setSavingId(null);
+    loadData();
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onBack}
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-xl font-bold text-amber-400">Collect Payment</h1>
+          <p className="text-xs text-neutral-500">Record member fee payments</p>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-amber-600/5 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-amber-300/80">Total Collected</p>
+            <p className="mt-1 flex items-center text-2xl font-bold text-amber-300">
+              <IndianRupee className="h-5 w-5" />
+              {totalCollected.toLocaleString("en-IN")}
+            </p>
+          </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
+            <Wallet className="h-6 w-6 text-amber-300" />
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-neutral-400">{payments.length} payment{payments.length === 1 ? "" : "s"} recorded</p>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+        <Input
+          placeholder="Search member..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border-neutral-800 bg-neutral-900/60 pl-9 text-neutral-200 placeholder:text-neutral-600"
+        />
+      </div>
+
+      {/* List */}
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-12 text-center">
+          <Wallet className="mx-auto h-10 w-10 text-neutral-700" />
+          <p className="mt-3 text-sm text-neutral-500">No members found</p>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {filtered.map((m) => {
+            const last = latestPayment(m.id);
+            return (
+              <div
+                key={m.id}
+                className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3.5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-neutral-100">{m.name}</p>
+                    {m.phone && <p className="mt-0.5 text-xs text-neutral-500">{m.phone}</p>}
+                    {last && (
+                      <p className="mt-1 flex items-center gap-1 text-[11px] text-emerald-400/90">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Last paid ₹{Number(last.amount).toLocaleString("en-IN")} on {last.payment_date}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+                    <Input
+                      inputMode="numeric"
+                      placeholder="Amount"
+                      value={amounts[m.id] || ""}
+                      onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
+                      className="h-9 border-neutral-800 bg-neutral-950/60 pl-7 text-sm text-neutral-100 placeholder:text-neutral-600"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleCollect(m)}
+                    disabled={savingId === m.id}
+                    className="flex h-9 items-center gap-1.5 rounded-lg bg-amber-500/90 px-3.5 text-xs font-semibold text-neutral-950 transition-colors hover:bg-amber-400 disabled:opacity-60"
+                  >
+                    {savingId === m.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Wallet className="h-3.5 w-3.5" />
+                    )}
+                    Collect
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

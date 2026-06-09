@@ -9,6 +9,7 @@ import { MembersScreen } from "@/components/screens/MembersScreen";
 import { InfoScreen } from "@/components/screens/InfoScreen";
 import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
 import { MemberListScreen } from "@/components/screens/MemberListScreen";
+import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -58,6 +59,7 @@ export function Dashboard({ session }: DashboardProps) {
             greeting={greeting}
             onAddMember={() => setAddMemberOpen(true)}
             onAttendance={() => setScreen("attendance")}
+            onCollectPayment={() => setScreen("collect-payment")}
             onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
           />
         )}
@@ -65,6 +67,7 @@ export function Dashboard({ session }: DashboardProps) {
           <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => setScreen("home")} />
         )}
         {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => setScreen("home")} />}
+        {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} onBack={() => setScreen("home")} />}
         {screen === "members" && <MembersScreen userId={session.user.id} />}
         {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
       </main>
