@@ -34,7 +34,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     setLoading(true);
     const [m, p] = await Promise.all([
       supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
-      supabase.from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
+      (supabase as any).from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
     ]);
     if (m.data) setMembers(m.data);
     if (p.data) setPayments(p.data as Payment[]);
@@ -58,7 +58,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       return;
     }
     setSavingId(member.id);
-    const { error } = await supabase.from("payments").insert({
+    const { error } = await (supabase as any).from("payments").insert({
       user_id: userId,
       admission_id: member.id,
       amount,
