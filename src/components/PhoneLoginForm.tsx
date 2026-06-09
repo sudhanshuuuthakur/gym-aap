@@ -27,6 +27,18 @@ export function PhoneLoginForm() {
       return;
     }
 
+    if (mode === "signup") {
+      const trivialPins = new Set([
+        "000000", "111111", "222222", "333333", "444444",
+        "555555", "666666", "777777", "888888", "999999",
+        "123456", "654321", "012345", "543210", "121212", "123123",
+      ]);
+      if (trivialPins.has(pin) || /^(\d)\1{5}$/.test(pin)) {
+        toast.error("Please choose a less predictable 6-digit PIN");
+        return;
+      }
+    }
+
     setLoading(true);
 
     if (mode === "signup") {
@@ -37,7 +49,7 @@ export function PhoneLoginForm() {
       });
       setLoading(false);
       if (error) {
-        toast.error(error.message);
+        toast.error("Unable to create account. Please check your details and try again.");
       } else {
         toast.success("Account created! You're now signed in.");
       }
