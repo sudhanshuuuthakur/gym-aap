@@ -28,12 +28,11 @@ export function Dashboard({ session }: DashboardProps) {
   useEffect(() => {
     supabase
       .from("profiles")
-      .select("display_name, default_membership_fee, phone")
+      .select("display_name, phone")
       .eq("user_id", session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
-        if (data?.default_membership_fee) setDefaultFee(data.default_membership_fee);
       });
   }, [session.user.id]);
 
