@@ -10,6 +10,12 @@ interface Member {
   status: string;
 }
 
+interface Payment {
+  admission_id: string;
+  amount: number;
+  payment_date: string;
+}
+
 interface MembershipStatsProps {
   userId: string;
   onViewMembers?: (filter: "all" | "paid" | "notpaid") => void;
@@ -17,26 +23,46 @@ interface MembershipStatsProps {
 
 export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps) {
   const [members, setMembers] = useState<Member[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<"all" | "paid" | "notpaid" | null>(null);
 
   useEffect(() => {
     async function fetchStats() {
-      const { data } = await supabase
-        .from("admissions")
-        .select("id, name, status")
-        .eq("user_id", userId)
-        .order("name");
+      const [memberRes, paymentRes] = await Promise.all([
+        supabase
+          .from("admissions")
+          .select("id, name, status")
+          .eq("user_id", userId)
+          .order("name"),
+        (supabase as any)
+          .from("payments")
+          .select("admission_id, amount, payment_date")
+          .eq("user_id", userId)
+          .order("payment_date", { ascending: false }),
+      ]);
 
-      if (data) setMembers(data);
+      if (memberRes.data) setMembers(memberRes.data);
+      if (paymentRes.data) setPayments(paymentRes.data as Payment[]);
       setLoading(false);
     }
     fetchStats();
   }, [userId]);
 
+  const getLatestPayment = (memberId: string) =>
+    payments.find((p) => p.admission_id === memberId);
+
+  const isPaymentValid = (payment: Payment | undefined) => {
+    if (!payment) return false;
+    const paymentDate = new Date(payment.payment_date);
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff <= 30;
+  };
+
   const total = members.length;
-  const paidMembers = members.filter((m) => m.status === "approved");
-  const pendingMembers = members.filter((m) => m.status === "pending");
+  const paidMembers = members.filter((m) => isPaymentValid(getLatestPayment(m.id)));
+  const pendingMembers = members.filter((m) => !isPaymentValid(getLatestPayment(m.id)));
   const paid = paidMembers.length;
   const pending = pendingMembers.length;
   const paidPercent = total > 0 ? Math.round((paid / total) * 100) : 0;
@@ -48,14 +74,18 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
 
   const MemberList = ({ list, showDot }: { list: Member[]; showDot?: boolean }) => (
     <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
-      {list.map((m) => (
-        <div key={m.id} className="flex items-center gap-2 rounded-lg bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200">
-          {(showDot ?? true) && (
-            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${m.status === "approved" ? "bg-emerald-400" : "bg-red-400"}`} />
-          )}
-          {m.name}
-        </div>
-      ))}
+      {list.map((m) => {
+        const lastPayment = getLatestPayment(m.id);
+        const isValid = isPaymentValid(lastPayment);
+        return (
+          <div key={m.id} className="flex items-center gap-2 rounded-lg bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200">
+            {(showDot ?? true) && (
+              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${isValid ? "bg-emerald-400" : "bg-red-400"}`} />
+            )}
+            {m.name}
+          </div>
+        );
+      })}
       {list.length === 0 && (
         <p className="text-xs text-neutral-500 text-center py-2">No members</p>
       )}

@@ -18,6 +18,7 @@ interface DashboardProps {
 
 export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [defaultFee, setDefaultFee] = useState<number>(500);
   const [editOpen, setEditOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("home");
@@ -27,11 +28,12 @@ export function Dashboard({ session }: DashboardProps) {
   useEffect(() => {
     supabase
       .from("profiles")
-      .select("display_name, phone")
+      .select("display_name, default_membership_fee, phone")
       .eq("user_id", session.user.id)
       .single()
       .then(({ data }) => {
         if (data?.display_name) setDisplayName(data.display_name);
+        if (data?.default_membership_fee) setDefaultFee(data.default_membership_fee);
       });
   }, [session.user.id]);
 
@@ -80,6 +82,7 @@ export function Dashboard({ session }: DashboardProps) {
         onOpenChange={setEditOpen}
         userId={session.user.id}
         currentDisplayName={displayName}
+        currentDefaultFee={defaultFee}
         onSaved={(name) => setDisplayName(name)}
       />
 

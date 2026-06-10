@@ -29,15 +29,18 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [search, setSearch] = useState("");
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [defaultFee, setDefaultFee] = useState<number>(500);
 
   const loadData = async () => {
     setLoading(true);
-    const [m, p] = await Promise.all([
+    const [m, p, profile] = await Promise.all([
       supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
       (supabase as any).from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
+      supabase.from("profiles").select("default_membership_fee").eq("user_id", userId).single(),
     ]);
     if (m.data) setMembers(m.data);
     if (p.data) setPayments(p.data as Payment[]);
+    if (profile.data?.default_membership_fee) setDefaultFee(profile.data.default_membership_fee);
     setLoading(false);
   };
 
@@ -47,6 +50,22 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
 
   const latestPayment = (id: string) => payments.find((p) => p.admission_id === id);
   const totalCollected = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
+
+  const isPaymentValid = (payment: Payment | undefined) => {
+    if (!payment) return false;
+    const paymentDate = new Date(payment.payment_date);
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff <= 30;
+  };
+
+  const getDaysRemaining = (payment: Payment | undefined) => {
+    if (!payment) return 0;
+    const paymentDate = new Date(payment.payment_date);
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, 30 - daysDiff);
+  };
 
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -147,9 +166,24 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     <p className="truncate text-sm font-semibold text-neutral-100">{m.name}</p>
                     {m.phone && <p className="mt-0.5 text-xs text-neutral-500">{m.phone}</p>}
                     {last && (
-                      <p className="mt-1 flex items-center gap-1 text-[11px] text-emerald-400/90">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Last paid ₹{Number(last.amount).toLocaleString("en-IN")} on {last.payment_date}
+                      <p className="mt-1 flex items-center gap-1 text-[11px]">
+                        {isPaymentValid(last) ? (
+                          <>
+                            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                            <span className="text-emerald-400/90">PAID - {getDaysRemaining(last)} days left</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="h-3 w-3 rounded-full border border-red-400 bg-transparent" />
+                            <span className="text-red-400/90">UNPAID - Payment expired</span>
+                          </>
+                        )}
+                      </p>
+                    )}
+                    {!last && (
+                      <p className="mt-1 flex items-center gap-1 text-[11px] text-neutral-500">
+                        <div className="h-3 w-3 rounded-full border border-neutral-600 bg-transparent" />
+                        No payment yet
                       </p>
                     )}
                   </div>
@@ -159,8 +193,11 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
                     <Input
                       inputMode="numeric"
-                      placeholder="Amount"
+                      placeholder={`Amount (Default: ₹${defaultFee})`}
                       value={amounts[m.id] || ""}
+                      onFocus={() => {
+                        if (!amounts[m.id]) setAmounts((a) => ({ ...a, [m.id]: defaultFee.toString() }));
+                      }}
                       onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
                       className="h-9 border-neutral-800 bg-neutral-950/60 pl-7 text-sm text-neutral-100 placeholder:text-neutral-600"
                     />

@@ -12,6 +12,12 @@ interface Member {
   phone: string | null;
 }
 
+interface Payment {
+  admission_id: string;
+  amount: number;
+  payment_date: string;
+}
+
 interface MemberListScreenProps {
   userId: string;
   filter: MemberFilter;
@@ -26,25 +32,58 @@ const filterConfig = {
 
 export function MemberListScreen({ userId, filter, onBack }: MemberListScreenProps) {
   const [members, setMembers] = useState<Member[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    supabase
-      .from("admissions")
-      .select("id, name, status, phone")
-      .eq("user_id", userId)
-      .order("name")
-      .then(({ data }) => {
-        if (data) setMembers(data);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase
+        .from("admissions")
+        .select("id, name, status, phone")
+        .eq("user_id", userId)
+        .order("name"),
+      (supabase as any)
+        .from("payments")
+        .select("admission_id, amount, payment_date")
+        .eq("user_id", userId)
+        .order("payment_date", { ascending: false }),
+    ]).then(([memberRes, paymentRes]) => {
+      if (memberRes.data) setMembers(memberRes.data);
+      if (paymentRes.data) setPayments(paymentRes.data as Payment[]);
+      setLoading(false);
+    });
   }, [userId]);
 
+  const getLatestPayment = (memberId: string) => 
+    payments.find((p) => p.admission_id === memberId);
+
+  const isPaymentValid = (payment: Payment | undefined) => {
+    if (!payment) return false;
+    const paymentDate = new Date(payment.payment_date);
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
+    return daysDiff <= 30;
+  };
+
+  const getDaysRemaining = (payment: Payment | undefined) => {
+    if (!payment) return 0;
+    const paymentDate = new Date(payment.payment_date);
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
+    return Math.max(0, 30 - daysDiff);
+  };
+
   const filteredByStatus = filter === "paid"
-    ? members.filter((m) => m.status === "approved")
+    ? members.filter((m) => {
+        const lastPayment = getLatestPayment(m.id);
+        return isPaymentValid(lastPayment);
+      })
     : filter === "notpaid"
-      ? members.filter((m) => m.status === "pending")
+      ? members.filter((m) => {
+          const lastPayment = getLatestPayment(m.id);
+          return !isPaymentValid(lastPayment);
+        })
       : members;
 
   const filtered = filteredByStatus.filter((m) =>
@@ -97,7 +136,9 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
       ) : (
         <div className="space-y-2">
           {filtered.map((member) => {
-            const isPaid = member.status === "approved";
+            const lastPayment = getLatestPayment(member.id);
+            const isPaid = isPaymentValid(lastPayment);
+            const daysRemaining = getDaysRemaining(lastPayment);
             return (
               <div
                 key={member.id}
@@ -113,7 +154,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                 </div>
                 <div className="flex items-center gap-2 pl-3">
                   <span className="text-[10px] font-medium text-neutral-500">
-                    {isPaid ? "Paid" : "Unpaid"}
+                    {isPaid ? `Paid (${daysRemaining}d)` : "Unpaid"}
                   </span>
                   <span
                     className={`h-3 w-3 shrink-0 rounded-full ${
