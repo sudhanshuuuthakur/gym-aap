@@ -74,7 +74,7 @@ export function PhoneLoginForm() {
           <Phone className="h-6 w-6 text-primary-foreground" />
         </div>
         <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-300">
-          {mode === "login" ? "Welcome back" : "Create account"}
+          {mode === "login" ? "Gym Manager" : "Create account"}
         </h2>
         <p className="text-sm text-neutral-400">
           {mode === "login"
