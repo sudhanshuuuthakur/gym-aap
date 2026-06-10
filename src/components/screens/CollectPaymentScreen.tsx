@@ -166,19 +166,24 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     <p className="truncate text-sm font-semibold text-neutral-100">{m.name}</p>
                     {m.phone && <p className="mt-0.5 text-xs text-neutral-500">{m.phone}</p>}
                     {last && (
-                      <p className="mt-1 flex items-center gap-1 text-[11px]">
-                        {isPaymentValid(last) ? (
-                          <>
-                            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                            <span className="text-emerald-400/90">PAID - {getDaysRemaining(last)} days left</span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="h-3 w-3 rounded-full border border-red-400 bg-transparent" />
-                            <span className="text-red-400/90">UNPAID - Payment expired</span>
-                          </>
-                        )}
-                      </p>
+                      <div className="mt-1 space-y-1">
+                        <p className="flex items-center gap-1 text-[11px]">
+                          {isPaymentValid(last) ? (
+                            <>
+                              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                              <span className="text-emerald-400/90">PAID - {getDaysRemaining(last)} days left</span>
+                            </>
+                          ) : (
+                            <>
+                              <div className="h-3 w-3 rounded-full border border-red-400 bg-transparent" />
+                              <span className="text-red-400/90">UNPAID - Payment expired</span>
+                            </>
+                          )}
+                        </p>
+                        <p className="text-[10px] text-neutral-500">
+                          Last paid: ₹{Number(last.amount).toLocaleString("en-IN")} on {new Date(last.payment_date).toLocaleDateString("en-IN")}
+                        </p>
+                      </div>
                     )}
                     {!last && (
                       <p className="mt-1 flex items-center gap-1 text-[11px] text-neutral-500">
