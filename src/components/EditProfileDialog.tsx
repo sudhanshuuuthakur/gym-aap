@@ -44,19 +44,10 @@ export function EditProfileDialog({
       return;
     }
 
-    const fee = Number(defaultFee);
-    if (isNaN(fee) || fee <= 0) {
-      toast.error("Default fee must be a positive number");
-      return;
-    }
-
     setLoading(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ 
-        display_name: trimmed,
-        default_membership_fee: fee 
-      })
+      .update({ display_name: trimmed })
       .eq("user_id", userId);
     setLoading(false);
 

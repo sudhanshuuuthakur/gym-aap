@@ -33,14 +33,12 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
 
   const loadData = async () => {
     setLoading(true);
-    const [m, p, profile] = await Promise.all([
+    const [m, p] = await Promise.all([
       supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
       (supabase as any).from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
-      supabase.from("profiles").select("default_membership_fee").eq("user_id", userId).single(),
     ]);
     if (m.data) setMembers(m.data);
     if (p.data) setPayments(p.data as Payment[]);
-    if (profile.data?.default_membership_fee) setDefaultFee(profile.data.default_membership_fee);
     setLoading(false);
   };
 
