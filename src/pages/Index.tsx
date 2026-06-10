@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation";
 import { PhoneLoginForm } from "@/components/PhoneLoginForm";
 import { Dashboard } from "@/components/Dashboard";
 import type { Session } from "@supabase/supabase-js";
@@ -30,11 +29,21 @@ const Index = () => {
   }
 
   return (
-    <BackgroundGradientAnimation>
-      <div className="absolute z-50 inset-0 flex items-center justify-center px-4">
+    <div 
+      className="min-h-screen w-full bg-cover bg-center bg-no-repeat flex items-center justify-center px-4"
+      style={{
+        backgroundImage: "url('/gym.background.png')",
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Overlay for visibility */}
+      <div className="absolute inset-0 bg-gradient-to-br from-neutral-950/75 via-neutral-900/70 to-neutral-950/75 pointer-events-none" />
+      
+      {/* Login Form */}
+      <div className="relative z-10">
         <PhoneLoginForm />
       </div>
-    </BackgroundGradientAnimation>
+    </div>
   );
 };
 
