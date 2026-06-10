@@ -54,7 +54,7 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const fetchAdmissions = useCallback(async () => {
     const { data } = await supabase
       .from("admissions")
-      .select("*")
+      .select("id, name, email, phone, status, created_at, join_date, age, height, weight")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
     setAdmissions((data as Admission[]) || []);
