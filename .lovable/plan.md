@@ -1,31 +1,23 @@
+## Plan: Add 3-dot actions menu to each member in the Members page
 
-
-## Plan: Total Members screen with professional design
-
-Clicking the "Total Members" card in Membership Overview navigates to a dedicated full-screen member list. Each member row shows a green or red dot on the right based on payment status.
+Add a three-dot icon button on the right side of every member row in `AdmissionsList.tsx` (Members page only). Tapping it opens a dropdown menu with: Edit, Delete, View profile.
 
 ### Changes
 
-**1. Add `"member-list"` to Screen type in `src/components/BottomNav.tsx`**
-- Add to the type union (not to the visible nav tabs)
+**1. `src/components/AdmissionsList.tsx`**
+- Add a `MoreVertical` icon button next to the status badge for each member.
+- Wrap it with shadcn `DropdownMenu` containing three items: Edit, View profile, Delete.
+- Track `editingMember`, `viewingMember`, `deletingMember` state.
+- On Delete: open an `AlertDialog` confirmation; on confirm, delete the row from `admissions` and refresh the list (toast on success/failure).
 
-**2. Create `src/components/screens/MemberListScreen.tsx`**
-- Props: `userId`, `onBack`
-- Fetches all admissions for the user
-- Professional header with back arrow, title "Total Members", and member count badge
-- Search bar to filter by name
-- Clean list with subtle card styling per row: member name on left, green dot (paid/approved) or red dot (pending) on right
-- Empty state if no members
+**2. New `src/components/EditMemberDialog.tsx`**
+- Dialog with form fields: name, phone, email, age, weight, height.
+- Pre-filled from the selected member; on save, updates the row in `admissions` and calls `onUpdated()` to refetch.
 
-**3. Update `src/components/MembershipStats.tsx`**
-- Accept new `onViewAllMembers` callback prop
-- Wire the "Total Members" card click to call `onViewAllMembers()` instead of toggling inline list
-- Keep Paid and Not Paid inline expansion as-is (only Total Members navigates)
+**3. New `src/components/MemberProfileDialog.tsx`**
+- Read-only dialog showing all member info: name, phone, email, age, weight, height, join date, status, created date.
+- Also fetches and lists the last few payments and attendance check-ins for that member.
 
-**4. Update `src/components/screens/HomeScreen.tsx`**
-- Accept and pass `onViewAllMembers` prop down to `MembershipStats`
-
-**5. Update `src/components/Dashboard.tsx`**
-- Add `member-list` screen rendering with `MemberListScreen`
-- Pass `onViewAllMembers` callback to `HomeScreen` that sets screen to `"member-list"`
-
+### Scope guard
+- Three-dot menu is added only to `AdmissionsList` (Members page). The `MemberListScreen` (Membership Overview drilldowns) is untouched.
+- No database schema changes; uses existing RLS policies on `admissions` (update/delete already allowed for the owner).
