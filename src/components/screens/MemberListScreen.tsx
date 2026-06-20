@@ -57,7 +57,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
         .order("payment_date", { ascending: false }),
       supabase
         .from("profiles")
-        .select("gym_name, phone")
+        .select("display_name, phone")
         .eq("id", userId)
         .single(),
     ]).then(([memberRes, paymentRes, profileRes]) => {
@@ -230,7 +230,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
             const daysRemaining = getDaysRemaining(lastPayment);
             const expiryDate = getExpiryDate(lastPayment);
             const amount = lastPayment?.amount ?? 0;
-            const gymName = profile?.gym_name || "Your Gym";
+            const gymName = profile?.display_name || "Your Gym";
             const contactNumber = profile?.phone || "";
             return (
               <div
