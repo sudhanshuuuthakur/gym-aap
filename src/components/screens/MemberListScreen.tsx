@@ -20,7 +20,7 @@ interface Payment {
 }
 
 interface Profile {
-  gym_name: string | null;
+  display_name: string | null;
   phone: string | null;
 }
 
