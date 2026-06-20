@@ -94,6 +94,31 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
   const config = filterConfig[filter];
   const Icon = config.icon;
 
+  const buildReminder = (name: string) =>
+    `Hi ${name}, this is a friendly reminder from the gym that your monthly membership fee is due. Please pay at your earliest convenience. Thank you!`;
+
+  const sanitizePhone = (phone: string) => phone.replace(/[^0-9+]/g, "").replace(/^\+/, "");
+
+  const notifyWhatsApp = (name: string, phone: string | null) => {
+    if (!phone) {
+      toast.error("No phone number on file");
+      return;
+    }
+    const number = sanitizePhone(phone);
+    const text = encodeURIComponent(buildReminder(name));
+    window.open(`https://wa.me/${number}?text=${text}`, "_blank", "noopener,noreferrer");
+  };
+
+  const notifySms = (name: string, phone: string | null) => {
+    if (!phone) {
+      toast.error("No phone number on file");
+      return;
+    }
+    const number = phone.replace(/[^0-9+]/g, "");
+    const text = encodeURIComponent(buildReminder(name));
+    window.location.href = `sms:${number}?body=${text}`;
+  };
+
   return (
     <div className="space-y-5">
       {/* Header */}
