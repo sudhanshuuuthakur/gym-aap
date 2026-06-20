@@ -19,6 +19,11 @@ interface Payment {
   payment_date: string;
 }
 
+interface Profile {
+  gym_name: string | null;
+  phone: string | null;
+}
+
 interface MemberListScreenProps {
   userId: string;
   filter: MemberFilter;
@@ -34,6 +39,7 @@ const filterConfig = {
 export function MemberListScreen({ userId, filter, onBack }: MemberListScreenProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -49,9 +55,15 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
         .select("admission_id, amount, payment_date")
         .eq("user_id", userId)
         .order("payment_date", { ascending: false }),
-    ]).then(([memberRes, paymentRes]) => {
+      supabase
+        .from("profiles")
+        .select("gym_name, phone")
+        .eq("id", userId)
+        .single(),
+    ]).then(([memberRes, paymentRes, profileRes]) => {
       if (memberRes.data) setMembers(memberRes.data);
       if (paymentRes.data) setPayments(paymentRes.data as Payment[]);
+      if (profileRes.data) setProfile(profileRes.data as Profile);
       setLoading(false);
     });
   }, [userId]);
@@ -75,6 +87,13 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
     return Math.max(0, 30 - daysDiff);
   };
 
+  const getExpiryDate = (payment: Payment | undefined) => {
+    if (!payment) return "N/A";
+    const paymentDate = new Date(payment.payment_date);
+    paymentDate.setDate(paymentDate.getDate() + 30);
+    return paymentDate.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  };
+
   const filteredByStatus = filter === "paid"
     ? members.filter((m) => {
         const lastPayment = getLatestPayment(m.id);
@@ -94,28 +113,72 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
   const config = filterConfig[filter];
   const Icon = config.icon;
 
-  const buildReminder = (name: string) =>
-    `Hi ${name}, this is a friendly reminder from the gym that your monthly membership fee is due. Please pay at your earliest convenience. Thank you!`;
+  const buildReminder = ({
+    name,
+    expiryDate,
+    amount,
+    gymName,
+    contactNumber,
+  }: {
+    name: string;
+    expiryDate: string;
+    amount: number;
+    gymName: string;
+    contactNumber: string;
+  }) =>
+    `🏋️ Membership Renewal Reminder\n\nHi ${name},\n\nThis is a friendly reminder that your gym membership has expired on ${expiryDate}.\n\nTo continue enjoying uninterrupted access to our gym facilities and services, please renew your membership by paying the monthly fee at your earliest convenience.\n\nFee Amount: ₹${amount}\n\nFor any assistance regarding payment or membership renewal, feel free to contact us.\n\nThank you for being a valued member of ${gymName}. We look forward to helping you achieve your fitness goals.\n\nTeam ${gymName}\n📞 ${contactNumber}`;
 
   const sanitizePhone = (phone: string) => phone.replace(/[^0-9+]/g, "").replace(/^\+/, "");
 
-  const notifyWhatsApp = (name: string, phone: string | null) => {
+  const notifyWhatsApp = ({
+    name,
+    phone,
+    expiryDate,
+    amount,
+    gymName,
+    contactNumber,
+  }: {
+    name: string;
+    phone: string | null;
+    expiryDate: string;
+    amount: number;
+    gymName: string;
+    contactNumber: string;
+  }) => {
     if (!phone) {
       toast.error("No phone number on file");
       return;
     }
     const number = sanitizePhone(phone);
-    const text = encodeURIComponent(buildReminder(name));
+    const text = encodeURIComponent(
+      buildReminder({ name, expiryDate, amount, gymName, contactNumber })
+    );
     window.open(`https://wa.me/${number}?text=${text}`, "_blank", "noopener,noreferrer");
   };
 
-  const notifySms = (name: string, phone: string | null) => {
+  const notifySms = ({
+    name,
+    phone,
+    expiryDate,
+    amount,
+    gymName,
+    contactNumber,
+  }: {
+    name: string;
+    phone: string | null;
+    expiryDate: string;
+    amount: number;
+    gymName: string;
+    contactNumber: string;
+  }) => {
     if (!phone) {
       toast.error("No phone number on file");
       return;
     }
     const number = phone.replace(/[^0-9+]/g, "");
-    const text = encodeURIComponent(buildReminder(name));
+    const text = encodeURIComponent(
+      buildReminder({ name, expiryDate, amount, gymName, contactNumber })
+    );
     window.location.href = `sms:${number}?body=${text}`;
   };
 
@@ -165,6 +228,10 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
             const lastPayment = getLatestPayment(member.id);
             const isPaid = isPaymentValid(lastPayment);
             const daysRemaining = getDaysRemaining(lastPayment);
+            const expiryDate = getExpiryDate(lastPayment);
+            const amount = lastPayment?.amount ?? 0;
+            const gymName = profile?.gym_name || "Your Gym";
+            const contactNumber = profile?.phone || "";
             return (
               <div
                 key={member.id}
@@ -193,7 +260,16 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                 {!isPaid && (
                   <div className="mt-3 flex gap-2">
                     <button
-                      onClick={() => notifyWhatsApp(member.name, member.phone)}
+                      onClick={() =>
+                        notifyWhatsApp({
+                          name: member.name,
+                          phone: member.phone,
+                          expiryDate,
+                          amount,
+                          gymName,
+                          contactNumber,
+                        })
+                      }
                       disabled={!member.phone}
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
                     >
@@ -201,7 +277,16 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                       WhatsApp
                     </button>
                     <button
-                      onClick={() => notifySms(member.name, member.phone)}
+                      onClick={() =>
+                        notifySms({
+                          name: member.name,
+                          phone: member.phone,
+                          expiryDate,
+                          amount,
+                          gymName,
+                          contactNumber,
+                        })
+                      }
                       disabled={!member.phone}
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-sky-500/10 px-3 py-2 text-xs font-medium text-sky-400 transition-colors hover:bg-sky-500/20 disabled:opacity-40"
                     >
