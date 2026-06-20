@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Users, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Search, Users, CheckCircle2, Clock, MessageCircle, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export type MemberFilter = "all" | "paid" | "notpaid";
 
@@ -93,6 +94,31 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
   const config = filterConfig[filter];
   const Icon = config.icon;
 
+  const buildReminder = (name: string) =>
+    `Hi ${name}, this is a friendly reminder from the gym that your monthly membership fee is due. Please pay at your earliest convenience. Thank you!`;
+
+  const sanitizePhone = (phone: string) => phone.replace(/[^0-9+]/g, "").replace(/^\+/, "");
+
+  const notifyWhatsApp = (name: string, phone: string | null) => {
+    if (!phone) {
+      toast.error("No phone number on file");
+      return;
+    }
+    const number = sanitizePhone(phone);
+    const text = encodeURIComponent(buildReminder(name));
+    window.open(`https://wa.me/${number}?text=${text}`, "_blank", "noopener,noreferrer");
+  };
+
+  const notifySms = (name: string, phone: string | null) => {
+    if (!phone) {
+      toast.error("No phone number on file");
+      return;
+    }
+    const number = phone.replace(/[^0-9+]/g, "");
+    const text = encodeURIComponent(buildReminder(name));
+    window.location.href = `sms:${number}?body=${text}`;
+  };
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -142,26 +168,48 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
             return (
               <div
                 key={member.id}
-                className="flex items-center justify-between rounded-xl border border-neutral-800/60 bg-neutral-900/40 px-4 py-3.5 transition-colors hover:bg-neutral-800/40"
+                className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 px-4 py-3.5 transition-colors hover:bg-neutral-800/40"
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-neutral-100">
-                    {member.name}
-                  </p>
-                  {member.phone && (
-                    <p className="mt-0.5 text-xs text-neutral-500">{member.phone}</p>
-                  )}
+                <div className="flex items-center justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-neutral-100">
+                      {member.name}
+                    </p>
+                    {member.phone && (
+                      <p className="mt-0.5 text-xs text-neutral-500">{member.phone}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 pl-3">
+                    <span className="text-[10px] font-medium text-neutral-500">
+                      {isPaid ? `Paid (${daysRemaining}d)` : "Unpaid"}
+                    </span>
+                    <span
+                      className={`h-3 w-3 shrink-0 rounded-full ${
+                        isPaid ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]"
+                      }`}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 pl-3">
-                  <span className="text-[10px] font-medium text-neutral-500">
-                    {isPaid ? `Paid (${daysRemaining}d)` : "Unpaid"}
-                  </span>
-                  <span
-                    className={`h-3 w-3 shrink-0 rounded-full ${
-                      isPaid ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]"
-                    }`}
-                  />
-                </div>
+                {!isPaid && (
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => notifyWhatsApp(member.name, member.phone)}
+                      disabled={!member.phone}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      WhatsApp
+                    </button>
+                    <button
+                      onClick={() => notifySms(member.name, member.phone)}
+                      disabled={!member.phone}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-sky-500/10 px-3 py-2 text-xs font-medium text-sky-400 transition-colors hover:bg-sky-500/20 disabled:opacity-40"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      SMS
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
