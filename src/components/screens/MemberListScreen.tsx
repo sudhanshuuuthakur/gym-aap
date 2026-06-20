@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Users, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Search, Users, CheckCircle2, Clock, MessageCircle, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 export type MemberFilter = "all" | "paid" | "notpaid";
 
