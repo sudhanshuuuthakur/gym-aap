@@ -79,7 +79,7 @@ export function PhoneLoginForm() {
         <p className="text-sm text-neutral-400">
           {mode === "login"
             ? "Sign in with your phone number & PIN"
-            : "Enter your phone number & choose a 6-digit PIN"}
+            : "New user? Enter your 10-digit phone number and choose a 6-digit PIN"}
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export function PhoneLoginForm() {
             type="tel"
             inputMode="numeric"
             maxLength={10}
-            placeholder="+1 234 567 8900"
+            placeholder="10-digit phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
             className="bg-neutral-900/50 border-neutral-700 text-neutral-100 placeholder:text-neutral-500 backdrop-blur-sm"
