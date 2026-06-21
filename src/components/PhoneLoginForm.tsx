@@ -18,8 +18,8 @@ export function PhoneLoginForm() {
 
   const handleSubmit = async () => {
     const cleanPhone = phone.replace(/[^0-9+]/g, "");
-    if (cleanPhone.length < 7) {
-      toast.error("Please enter a valid phone number");
+    if (cleanPhone.length !== 10) {
+      toast.error("Please enter a valid 10-digit phone number");
       return;
     }
     if (pin.length < 6) {
@@ -90,9 +90,11 @@ export function PhoneLoginForm() {
           </label>
           <Input
             type="tel"
+            inputMode="numeric"
+            maxLength={10}
             placeholder="+1 234 567 8900"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
             className="bg-neutral-900/50 border-neutral-700 text-neutral-100 placeholder:text-neutral-500 backdrop-blur-sm"
           />
         </div>

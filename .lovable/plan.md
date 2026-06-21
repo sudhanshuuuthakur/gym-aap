@@ -1,23 +1,19 @@
-## Plan: Add 3-dot actions menu to each member in the Members page
+## Goal
+Ensure the login page restricts phone number input to exactly 10 digits and the PIN to exactly 6 digits.
 
-Add a three-dot icon button on the right side of every member row in `AdmissionsList.tsx` (Members page only). Tapping it opens a dropdown menu with: Edit, Delete, View profile.
+## Changes
 
-### Changes
+### 1. Phone number input (`src/components/PhoneLoginForm.tsx`)
+- Add `maxLength={10}` to the `<Input type="tel">`.
+- Add `inputMode="numeric"` for mobile numeric keyboards.
+- Update the `onChange` handler to strip non-digit characters and cap the value at 10 digits.
+- Update `handleSubmit` validation to require exactly 10 digits instead of the current `< 7` check.
 
-**1. `src/components/AdmissionsList.tsx`**
-- Add a `MoreVertical` icon button next to the status badge for each member.
-- Wrap it with shadcn `DropdownMenu` containing three items: Edit, View profile, Delete.
-- Track `editingMember`, `viewingMember`, `deletingMember` state.
-- On Delete: open an `AlertDialog` confirmation; on confirm, delete the row from `admissions` and refresh the list (toast on success/failure).
+### 2. PIN input (`src/components/PhoneLoginForm.tsx`)
+- The existing `<InputOTP maxLength={6}>` already limits input to 6 characters via the underlying `input-otp` library.
+- Keep the `pin.length < 6` validation in `handleSubmit` to enforce that all 6 slots are filled.
 
-**2. New `src/components/EditMemberDialog.tsx`**
-- Dialog with form fields: name, phone, email, age, weight, height.
-- Pre-filled from the selected member; on save, updates the row in `admissions` and calls `onUpdated()` to refetch.
-
-**3. New `src/components/MemberProfileDialog.tsx`**
-- Read-only dialog showing all member info: name, phone, email, age, weight, height, join date, status, created date.
-- Also fetches and lists the last few payments and attendance check-ins for that member.
-
-### Scope guard
-- Three-dot menu is added only to `AdmissionsList` (Members page). The `MemberListScreen` (Membership Overview drilldowns) is untouched.
-- No database schema changes; uses existing RLS policies on `admissions` (update/delete already allowed for the owner).
+## Outcome
+- Users can only type up to 10 numeric digits in the phone field.
+- Users can only type up to 6 digits in the PIN field.
+- Submit validation rejects anything other than exactly 10-digit phone numbers and 6-digit PINs.
