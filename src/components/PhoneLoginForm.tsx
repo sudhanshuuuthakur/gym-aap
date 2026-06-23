@@ -61,7 +61,9 @@ export function PhoneLoginForm() {
       });
       setLoading(false);
       if (error) {
-        toast.error("Invalid phone number or PIN");
+        toast.error("No account found. Please create one below.");
+        setMode("signup");
+        setPin("");
       } else {
         toast.success("Signed in!");
       }
