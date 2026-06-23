@@ -36,8 +36,11 @@ const Index = () => {
         backgroundAttachment: 'fixed'
       }}
     >
-      {/* Overlay for visibility */}
-      <div className="absolute inset-0 bg-gradient-to-br from-neutral-950/75 via-neutral-900/70 to-neutral-950/75 pointer-events-none" />
+      {/* Refined dark overlay for readability */}
+      <div className="absolute inset-0 bg-[#030508]/70 backdrop-blur-[2px] pointer-events-none" />
+      
+      {/* Subtle ambient vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(3,5,8,0.55)_100%)] pointer-events-none" />
       
       {/* Login Form */}
       <div className="relative z-10">
