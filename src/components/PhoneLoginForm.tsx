@@ -49,7 +49,8 @@ export function PhoneLoginForm() {
       });
       setLoading(false);
       if (error) {
-        toast.error("Unable to create account. Please check your details and try again.");
+        console.error("Signup error:", error);
+        toast.error(error.message || "Unable to create account.");
       } else {
         toast.success("Account created! You're now signed in.");
       }

@@ -1,19 +1,34 @@
-## Goal
-Ensure the login page restricts phone number input to exactly 10 digits and the PIN to exactly 6 digits.
+## Problem
+New users cannot sign up. The login form turns the phone number into an email like `1234567890@phone.local` and uses the 6-digit PIN as the password, then calls `supabase.auth.signUp`. Sign-up is failing silently for everyone (the form shows the generic "Unable to create account" toast).
 
-## Changes
+## Likely Causes (in order of probability)
 
-### 1. Phone number input (`src/components/PhoneLoginForm.tsx`)
-- Add `maxLength={10}` to the `<Input type="tel">`.
-- Add `inputMode="numeric"` for mobile numeric keyboards.
-- Update the `onChange` handler to strip non-digit characters and cap the value at 10 digits.
-- Update `handleSubmit` validation to require exactly 10 digits instead of the current `< 7` check.
+1. **Leaked-password / weak-password rejection.** Supabase Auth blocks common PINs like `123456`, `000000`, etc. when the HIBP check or the default password strength rules are on. Every 6-digit numeric PIN is in the HIBP breach list, so *every* signup gets rejected with `weak_password` / `password_pwned`. This matches the symptom "no user can sign up".
+2. **Signups disabled** on the project (`disable_signup = true`).
+3. **Email-domain validation** rejecting `@phone.local` (less likely — Supabase normally accepts it, but worth confirming).
+4. **Generic error toast hides the real reason.** The form currently swallows `error.message`, so we can't see which of the above is firing.
 
-### 2. PIN input (`src/components/PhoneLoginForm.tsx`)
-- The existing `<InputOTP maxLength={6}>` already limits input to 6 characters via the underlying `input-otp` library.
-- Keep the `pin.length < 6` validation in `handleSubmit` to enforce that all 6 slots are filled.
+## Investigation & Fix Plan
 
-## Outcome
-- Users can only type up to 10 numeric digits in the phone field.
-- Users can only type up to 6 digits in the PIN field.
-- Submit validation rejects anything other than exactly 10-digit phone numbers and 6-digit PINs.
+### Step 1 — Surface the real error
+Update `PhoneLoginForm.tsx` so the signup branch shows `error.message` (and logs `error` to the console) instead of the generic message. This makes the actual Supabase reason visible immediately.
+
+### Step 2 — Turn off HIBP / leaked-password check for PIN auth
+A 6-digit numeric PIN can never pass HIBP. Call `supabase--configure_auth` with `password_hibp_enabled: false` (keeping `disable_signup: false`, `auto_confirm_email: true` so phone-style signups don't need email verification, `external_anonymous_users_enabled: false`).
+
+### Step 3 — Confirm signups are enabled and email auth is on
+Same `configure_auth` call ensures `disable_signup: false`. If email provider is off at the project level, note that the user must toggle it in the backend UI (the tool can't enable it).
+
+### Step 4 — Re-test
+After the fix, try creating a new account with a non-trivial PIN (e.g. `728193`). The form's own client-side check already blocks obvious PINs like `123456`, so this should now succeed.
+
+### Step 5 — If signup still fails
+Read the now-visible error message and address it directly (e.g. email-domain block → switch the synthetic domain to `@phone.app` or similar; rate-limit → wait; trigger error → fix `handle_new_user`).
+
+## Files Touched
+- `src/components/PhoneLoginForm.tsx` — show real error on signup failure.
+- Auth config — disable HIBP check, ensure signups enabled, auto-confirm on.
+
+## Out of Scope
+- No schema changes.
+- No change to phone/PIN length rules already in place.
