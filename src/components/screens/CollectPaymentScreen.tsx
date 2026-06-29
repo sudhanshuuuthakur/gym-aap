@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Wallet, CheckCircle2, IndianRupee, Loader2 } from "lucide-react";
+import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { PaymentHistoryScreen } from "@/components/screens/PaymentHistoryScreen";
 
 interface Member {
   id: string;
@@ -30,6 +31,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
+  const [showHistory, setShowHistory] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -96,20 +98,31 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     loadData();
   };
 
+  if (showHistory) {
+    return <PaymentHistoryScreen userId={userId} onBack={() => setShowHistory(false)} />;
+  }
+
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-amber-400">Collect Payment</h1>
           <p className="text-xs text-neutral-500">Record member fee payments</p>
         </div>
+        <button
+          onClick={() => setShowHistory(true)}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20"
+          aria-label="Payment history"
+        >
+          <History className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Summary */}
