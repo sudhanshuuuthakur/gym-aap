@@ -10,6 +10,7 @@ import { InfoScreen } from "@/components/screens/InfoScreen";
 import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
 import { MemberListScreen } from "@/components/screens/MemberListScreen";
 import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen";
+import { PremiumBackground } from "@/components/PremiumBackground";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -40,9 +41,10 @@ export function Dashboard({ session }: DashboardProps) {
   const greeting = displayName || phone;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950">
+    <div className="relative min-h-[100dvh] w-full bg-[#0A0A0A]">
+      <PremiumBackground />
       {/* Header */}
-      <header className="border-b border-neutral-800 bg-neutral-950/60 backdrop-blur-md">
+      <header className="relative z-10 border-b border-white/5 bg-[#0A0A0A]/50 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
             <Dumbbell className="h-4 w-4 text-primary-foreground" />
@@ -52,7 +54,7 @@ export function Dashboard({ session }: DashboardProps) {
       </header>
 
       {/* Screen Content */}
-      <main className="mx-auto max-w-5xl px-6 py-8 pb-24">
+      <main className="relative z-10 mx-auto max-w-5xl px-6 py-8 pb-24">
         {screen === "home" && (
           <HomeScreen
             key={refreshKey}
