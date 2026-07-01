@@ -1,34 +1,39 @@
-## Problem
-New users cannot sign up. The login form turns the phone number into an email like `1234567890@phone.local` and uses the 6-digit PIN as the password, then calls `supabase.auth.signUp`. Sign-up is failing silently for everyone (the form shows the generic "Unable to create account" toast).
+## Goal
+Add a premium, dark, CSS-only ambient background to the **Home tab of the Dashboard** (not the login page), matching the reference image: near-black canvas with soft emerald (top-left), blue (top-right), amber (bottom-right) glows, a faint dumbbell outline (bottom-left), thin rounded-square outlines in the corners, and subtle dotted grid clusters.
 
-## Likely Causes (in order of probability)
+## Scope
+- Applies only when logged in and viewing the Dashboard.
+- Login page (`src/pages/Index.tsx`) stays untouched.
+- Pure CSS — no images, SVG files, canvas, or external assets.
 
-1. **Leaked-password / weak-password rejection.** Supabase Auth blocks common PINs like `123456`, `000000`, etc. when the HIBP check or the default password strength rules are on. Every 6-digit numeric PIN is in the HIBP breach list, so *every* signup gets rejected with `weak_password` / `password_pwned`. This matches the symptom "no user can sign up".
-2. **Signups disabled** on the project (`disable_signup = true`).
-3. **Email-domain validation** rejecting `@phone.local` (less likely — Supabase normally accepts it, but worth confirming).
-4. **Generic error toast hides the real reason.** The form currently swallows `error.message`, so we can't see which of the above is firing.
+## Files
 
-## Investigation & Fix Plan
+**New: `src/components/PremiumBackground.tsx`**
+- Fixed layer: `position: fixed; inset: 0; pointer-events: none; z-index: 0;` behind content (content wrapper gets `relative z-10`).
+- Base fill: `#0A0A0A`.
+- Four corner glows via layered `radial-gradient`s (soft falloff, no heavy `filter: blur`):
+  - Top-left emerald `#10D08A` ~12% opacity
+  - Top-right blue `#4F8CFF` ~10%
+  - Bottom-right amber `#F5B933` ~10%
+  - Bottom-left neutral gray wash ~6%
+- Four thin rounded-square outlines (absolutely positioned divs with `border`, `border-radius: 28px`, rotated slightly) in each corner, tinted to match its glow at ~15–20% opacity — mirrors the reference's outlined shapes.
+- Two small dotted-grid clusters (top-left and top-right, plus one small bottom-center) built with a repeating `radial-gradient` tile, ~6% opacity, masked with a radial `mask-image` so dots fade out at the edges — matches the reference's dot halftone.
+- One faint inline SVG dumbbell **outline** in the bottom-left at ~4% opacity (kept inline as JSX, not an external asset — allowed since it's markup, not a file).
+- Vignette overlay: `radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)`.
+- All sizes/positions use `vw`, `vh`, `%`, and `clamp()` for responsiveness from phone → ultrawide.
 
-### Step 1 — Surface the real error
-Update `PhoneLoginForm.tsx` so the signup branch shows `error.message` (and logs `error` to the console) instead of the generic message. This makes the actual Supabase reason visible immediately.
+**Edit: `src/components/Dashboard.tsx`**
+- Replace root gradient with `bg-[#0A0A0A] relative min-h-[100dvh]`.
+- Mount `<PremiumBackground />` as first child.
+- Wrap header + main + bottom nav content in `relative z-10` so they sit above the background.
+- Header becomes `bg-[#0A0A0A]/50 backdrop-blur-md` so glows bleed subtly through.
 
-### Step 2 — Turn off HIBP / leaked-password check for PIN auth
-A 6-digit numeric PIN can never pass HIBP. Call `supabase--configure_auth` with `password_hibp_enabled: false` (keeping `disable_signup: false`, `auto_confirm_email: true` so phone-style signups don't need email verification, `external_anonymous_users_enabled: false`).
+## Non-changes
+- No edits to `src/index.css` design tokens (protects shadcn + login page).
+- No changes to login screen, PhoneLoginForm, or any other screen.
+- No animations — static, performance-friendly on mid-range Android.
 
-### Step 3 — Confirm signups are enabled and email auth is on
-Same `configure_auth` call ensures `disable_signup: false`. If email provider is off at the project level, note that the user must toggle it in the backend UI (the tool can't enable it).
-
-### Step 4 — Re-test
-After the fix, try creating a new account with a non-trivial PIN (e.g. `728193`). The form's own client-side check already blocks obvious PINs like `123456`, so this should now succeed.
-
-### Step 5 — If signup still fails
-Read the now-visible error message and address it directly (e.g. email-domain block → switch the synthetic domain to `@phone.app` or similar; rate-limit → wait; trigger error → fix `handle_new_user`).
-
-## Files Touched
-- `src/components/PhoneLoginForm.tsx` — show real error on signup failure.
-- Auth config — disable HIBP check, ensure signups enabled, auto-confirm on.
-
-## Out of Scope
-- No schema changes.
-- No change to phone/PIN length rules already in place.
+## Technical notes
+- Everything scoped inside `PremiumBackground.tsx` (Tailwind arbitrary values + one small `<style>` block for the dot-grid tile and mask).
+- `position: fixed` guarantees the background stays put across scroll and adapts to any viewport without repeat/stretch.
+- Total blur cost stays low because glows come from gradient falloff, not `filter: blur()` on large layers.
