@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Dumbbell } from "lucide-react";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { LogOut, Settings, User, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface InfoScreenProps {
@@ -15,38 +14,46 @@ export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-neutral-100">Info</h1>
+      <div>
+        <h1 className="text-[24px] font-bold tracking-tight text-white">Info</h1>
+        <p className="mt-1 text-[13px] text-[#64748B]">Account and preferences</p>
+      </div>
 
-      <Card className="border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-neutral-200">
-            <Dumbbell className="h-5 w-5" /> Gym Manager
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <p className="text-sm text-neutral-400">Logged in as</p>
-            <p className="text-neutral-100 font-medium">{greeting}</p>
+      <SurfaceCard className="p-5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E]">
+            <User className="h-5 w-5" strokeWidth={2} />
           </div>
+          <div className="min-w-0">
+            <p className="truncate text-[15px] font-semibold text-white">{greeting}</p>
+            <p className="text-[12px] text-[#94A3B8]">Signed in</p>
+          </div>
+        </div>
+      </SurfaceCard>
 
-          <div className="flex flex-col gap-3">
-            <Button
-              variant="outline"
-              className="justify-start border-neutral-700 text-neutral-300 hover:text-neutral-100"
-              onClick={onEditProfile}
-            >
-              <Settings className="mr-2 h-4 w-4" /> Edit Profile
-            </Button>
-            <Button
-              variant="outline"
-              className="justify-start border-neutral-700 text-red-400 hover:text-red-300 hover:border-red-500/50"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" /> Log Out
-            </Button>
+      <SurfaceCard className="p-2">
+        <button
+          onClick={onEditProfile}
+          className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06] text-white">
+            <Settings className="h-4 w-4" strokeWidth={2} />
           </div>
-        </CardContent>
-      </Card>
+          <span className="flex-1 text-[14px] font-medium text-white">Edit Profile</span>
+          <ChevronRight className="h-4 w-4 text-[#64748B]" />
+        </button>
+        <div className="mx-3 h-px bg-white/[0.06]" />
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EF4444]/12 text-[#EF4444]">
+            <LogOut className="h-4 w-4" strokeWidth={2} />
+          </div>
+          <span className="flex-1 text-[14px] font-medium text-[#EF4444]">Log Out</span>
+          <ChevronRight className="h-4 w-4 text-[#64748B]" />
+        </button>
+      </SurfaceCard>
     </div>
   );
 }
