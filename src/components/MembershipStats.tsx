@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Clock, Users, ChevronDown, ChevronUp } from "lucide-react";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { StatisticCard } from "@/components/premium/StatisticCard";
+import { CheckCircle2, Users, Clock, ChevronDown, TrendingUp } from "lucide-react";
 
 interface Member {
   id: string;
@@ -25,7 +25,7 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedSection, setExpandedSection] = useState<"all" | "paid" | "notpaid" | null>(null);
+  // reserved for future expand state
 
   useEffect(() => {
     async function fetchStats() {
@@ -66,138 +66,59 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
   const paid = paidMembers.length;
   const pending = pendingMembers.length;
   const paidPercent = total > 0 ? Math.round((paid / total) * 100) : 0;
-  const pendingPercent = total > 0 ? Math.round((pending / total) * 100) : 0;
-
-  const toggle = (section: "all" | "paid" | "notpaid") => {
-    setExpandedSection((prev) => (prev === section ? null : section));
-  };
-
-  const MemberList = ({ list, showDot }: { list: Member[]; showDot?: boolean }) => (
-    <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
-      {list.map((m) => {
-        const lastPayment = getLatestPayment(m.id);
-        const isValid = isPaymentValid(lastPayment);
-        return (
-          <div key={m.id} className="flex items-center gap-2 rounded-lg bg-neutral-800/50 px-3 py-2 text-sm text-neutral-200">
-            {(showDot ?? true) && (
-              <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${isValid ? "bg-emerald-400" : "bg-red-400"}`} />
-            )}
-            {m.name}
-          </div>
-        );
-      })}
-      {list.length === 0 && (
-        <p className="text-xs text-neutral-500 text-center py-2">No members</p>
-      )}
-    </div>
-  );
+  const collectionLabel = paidPercent >= 90 ? "Excellent" : paidPercent >= 60 ? "On track" : paidPercent >= 30 ? "Needs attention" : "Critical";
 
   if (loading) {
     return (
-      <Card className="border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
-        <CardContent className="py-8 text-center text-neutral-500 text-sm">
-          Loading stats...
-        </CardContent>
-      </Card>
+      <SurfaceCard className="py-10 text-center text-sm text-[#64748B]">
+        Loading stats…
+      </SurfaceCard>
     );
   }
 
   return (
-    <Card className="border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-neutral-200 text-lg">
-          <Users className="h-5 w-5" />
-          Membership Overview
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Big number summary - clickable */}
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <button
-              onClick={() => onViewMembers?.("all")}
-              className="w-full rounded-xl border border-neutral-800 bg-neutral-800/30 p-4 transition-colors hover:bg-neutral-800/60"
-            >
-              <p className="text-3xl font-bold text-neutral-100">{total}</p>
-              <p className="mt-1 text-xs text-neutral-400 flex items-center justify-center gap-1">
-                Total Members
-                <ChevronDown className="h-3 w-3" />
-              </p>
-            </button>
+    <SurfaceCard className="p-5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[15px] font-semibold tracking-tight text-white">Membership Overview</h2>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-[#181F2A] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-white"
+        >
+          This Month
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <StatisticCard label="Total Members" value={total} icon={Users} tone="neutral" onClick={() => onViewMembers?.("all")} />
+        <StatisticCard label="Paid" value={paid} icon={CheckCircle2} tone="primary" onClick={() => onViewMembers?.("paid")} />
+        <StatisticCard label="Pending" value={pending} icon={Clock} tone="warning" onClick={() => onViewMembers?.("notpaid")} />
+      </div>
+
+      {/* Payment collection */}
+      <div className="mt-5 rounded-2xl border border-white/[0.06] bg-[#181F2A] p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E]">
+              <TrendingUp className="h-4 w-4" strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-white">Payment Collection</p>
+              <p className="text-[11px] text-[#94A3B8]">{paid} of {total} members</p>
+            </div>
           </div>
-          <div>
-            <button
-              onClick={() => onViewMembers?.("paid")}
-              className="w-full rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 transition-colors hover:bg-emerald-500/10"
-            >
-              <p className="text-3xl font-bold text-emerald-400">{paid}</p>
-              <p className="mt-1 text-xs text-emerald-400/70 flex items-center justify-center gap-1">
-                Paid ✅
-                <ChevronDown className="h-3 w-3" />
-              </p>
-            </button>
-          </div>
-          <div>
-            <button
-              onClick={() => onViewMembers?.("notpaid")}
-              className="w-full rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 transition-colors hover:bg-amber-500/10"
-            >
-              <p className="text-3xl font-bold text-amber-400">{pending}</p>
-              <p className="mt-1 text-xs text-amber-400/70 flex items-center justify-center gap-1">
-                Not Paid ⏳
-                <ChevronDown className="h-3 w-3" />
-              </p>
-            </button>
+          <div className="text-right">
+            <p className="text-[18px] font-bold leading-none text-white">{paidPercent}%</p>
+            <p className="mt-1 text-[11px] font-medium text-[#22C55E]">{collectionLabel}</p>
           </div>
         </div>
-
-        {/* Progress bars */}
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-emerald-400">
-                <CheckCircle2 className="h-4 w-4" />
-                Paid
-              </span>
-              <span className="font-medium text-neutral-300">
-                {paid} of {total} ({paidPercent}%)
-              </span>
-            </div>
-            <Progress
-              value={paidPercent}
-              className="h-3 bg-neutral-800 [&>div]:bg-emerald-500"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-amber-400">
-                <Clock className="h-4 w-4" />
-                Still Remaining
-              </span>
-              <span className="font-medium text-neutral-300">
-                {pending} of {total} ({pendingPercent}%)
-              </span>
-            </div>
-            <Progress
-              value={pendingPercent}
-              className="h-3 bg-neutral-800 [&>div]:bg-amber-500"
-            />
-          </div>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/[0.06]" role="progressbar" aria-valuenow={paidPercent} aria-valuemin={0} aria-valuemax={100}>
+          <div
+            className="h-full rounded-full bg-[#22C55E] transition-[width] duration-500"
+            style={{ width: `${paidPercent}%` }}
+          />
         </div>
-
-        {total === 0 ? (
-          <p className="text-center text-sm text-neutral-500 py-2">
-            No members yet. Add your first admission below!
-          </p>
-        ) : (
-          <p className="text-center text-sm text-neutral-400 py-2">
-            {paid === total
-              ? "🎉 Everyone has paid! Great job!"
-              : `${pending} member${pending !== 1 ? "s" : ""} still need${pending === 1 ? "s" : ""} to pay`}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    </SurfaceCard>
   );
 }
