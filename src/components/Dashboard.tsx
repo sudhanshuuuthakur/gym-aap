@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Dumbbell } from "lucide-react";
+import { Bell, Dumbbell } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { BottomNav, type Screen } from "@/components/BottomNav";
@@ -10,7 +11,6 @@ import { InfoScreen } from "@/components/screens/InfoScreen";
 import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
 import { MemberListScreen } from "@/components/screens/MemberListScreen";
 import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen";
-import { PremiumBackground } from "@/components/PremiumBackground";
 import type { Session } from "@supabase/supabase-js";
 
 interface DashboardProps {
@@ -41,38 +41,55 @@ export function Dashboard({ session }: DashboardProps) {
   const greeting = displayName || phone;
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-[#0A0A0A]">
-      <PremiumBackground />
+    <div className="relative min-h-[100dvh] w-full bg-[#0B0F14] text-white">
       {/* Header */}
-      <header className="relative z-10 border-b border-white/5 bg-[#0A0A0A]/50 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-6 py-4">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/20">
-            <Dumbbell className="h-4 w-4 text-primary-foreground" />
+      <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-[#0B0F14]/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 pt-5 pb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22C55E]/12">
+              <Dumbbell className="h-4 w-4 text-[#22C55E]" strokeWidth={2.25} />
+            </div>
+            <span className="text-[15px] font-semibold tracking-tight text-white">Gym Manager</span>
           </div>
-          <span className="text-sm font-semibold text-neutral-100">Gym Manager</span>
+          <button
+            aria-label="Notifications"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
+          >
+            <Bell className="h-4 w-4" strokeWidth={2} />
+            <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#EF4444]" />
+          </button>
         </div>
       </header>
 
       {/* Screen Content */}
-      <main className="relative z-10 mx-auto max-w-5xl px-6 py-8 pb-24">
-        {screen === "home" && (
-          <HomeScreen
-            key={refreshKey}
-            userId={session.user.id}
-            greeting={greeting}
-            onAddMember={() => setAddMemberOpen(true)}
-            onAttendance={() => setScreen("attendance")}
-            onCollectPayment={() => setScreen("collect-payment")}
-            onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
-          />
-        )}
-        {screen === "member-list" && (
-          <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => setScreen("home")} />
-        )}
-        {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => setScreen("home")} />}
-        {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} onBack={() => setScreen("home")} />}
-        {screen === "members" && <MembersScreen userId={session.user.id} />}
-        {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
+      <main className="relative mx-auto max-w-5xl px-6 pt-6 pb-32">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={screen + "-" + refreshKey}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {screen === "home" && (
+              <HomeScreen
+                userId={session.user.id}
+                greeting={greeting}
+                onAddMember={() => setAddMemberOpen(true)}
+                onAttendance={() => setScreen("attendance")}
+                onCollectPayment={() => setScreen("collect-payment")}
+                onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
+              />
+            )}
+            {screen === "member-list" && (
+              <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => setScreen("home")} />
+            )}
+            {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => setScreen("home")} />}
+            {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} onBack={() => setScreen("home")} />}
+            {screen === "members" && <MembersScreen userId={session.user.id} />}
+            {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Bottom Navigation */}
