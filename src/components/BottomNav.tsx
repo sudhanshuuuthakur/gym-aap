@@ -21,7 +21,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
       className="fixed inset-x-0 bottom-0 z-50 pointer-events-none"
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 16px)" }}
     >
-      <div className="pointer-events-auto mx-auto flex max-w-md items-center justify-between gap-1 rounded-full border border-white/[0.06] bg-[#121821]/95 px-2 py-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl mx-4">
+      <div className="pointer-events-auto mx-4 flex max-w-md items-center justify-between gap-1 rounded-full border border-white/[0.06] bg-[#121821]/95 px-2 py-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = active === tab.id;
