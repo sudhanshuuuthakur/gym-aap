@@ -1,5 +1,8 @@
+import { motion } from "framer-motion";
 import { MembershipStats } from "@/components/MembershipStats";
-import { UserPlus, ClipboardCheck, Wallet } from "lucide-react";
+import { ActionCard } from "@/components/premium/ActionCard";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { UserPlus, ClipboardCheck, Wallet, CalendarClock, ChevronRight } from "lucide-react";
 
 interface HomeScreenProps {
   userId: string;
@@ -10,49 +13,75 @@ interface HomeScreenProps {
   onViewMembers?: (filter: "all" | "paid" | "notpaid") => void;
 }
 
-const quickActions = [
-  { id: "add-member", label: "Add Member", icon: UserPlus, color: "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30 text-emerald-400" },
-  { id: "attendance", label: "Attendance", icon: ClipboardCheck, color: "from-blue-500/20 to-blue-600/10 border-blue-500/30 text-blue-400" },
-  { id: "collect-payment", label: "Collect Payment", icon: Wallet, color: "from-amber-500/20 to-amber-600/10 border-amber-500/30 text-amber-400" },
-];
+function getGreetingLabel() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onCollectPayment, onViewMembers }: HomeScreenProps) {
-  const handleAction = (id: string) => {
-    if (id === "add-member" && onAddMember) onAddMember();
-    if (id === "attendance" && onAttendance) onAttendance();
-    if (id === "collect-payment" && onCollectPayment) onCollectPayment();
-  };
+  const salutation = getGreetingLabel();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-neutral-100">
-          👋 Hi, {greeting}
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Here's how your gym is doing today
+    <div className="space-y-7">
+      {/* Welcome */}
+      <motion.section
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <p className="text-[13px] font-medium text-[#94A3B8]">
+          {salutation} <span aria-hidden>👋</span>
         </p>
-      </div>
+        <h1 className="mt-1 truncate text-[24px] font-bold leading-tight tracking-tight text-white">
+          {greeting}
+        </h1>
+        <p className="mt-1.5 text-[13px] text-[#64748B]">
+          Here's today's gym overview.
+        </p>
+      </motion.section>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-3">
-        {quickActions.map((action) => {
-          const Icon = action.icon;
-          const isWide = action.id === "collect-payment";
-          return (
-            <button
-              key={action.id}
-              onClick={() => handleAction(action.id)}
-              className={`${isWide ? "col-span-2" : ""} flex flex-col items-center justify-center gap-2 rounded-2xl border bg-gradient-to-br h-28 p-6 transition-transform active:scale-[0.97] ${action.color}`}
-            >
-              <Icon className="h-8 w-8 shrink-0" />
-              <span className="text-sm font-semibold text-neutral-100">{action.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <section aria-labelledby="quick-actions-title">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 id="quick-actions-title" className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+            Quick Actions
+          </h2>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <ActionCard icon={UserPlus} title="Add Member" subtitle="Register new" onClick={onAddMember} tone="primary" index={0} />
+          <ActionCard icon={ClipboardCheck} title="Attendance" subtitle="Check-ins" onClick={onAttendance} tone="accent" index={1} />
+          <ActionCard icon={Wallet} title="Collect" subtitle="Payments" onClick={onCollectPayment} tone="warning" index={2} />
+        </div>
+      </section>
 
+      {/* Membership Overview */}
       <MembershipStats userId={userId} onViewMembers={onViewMembers} />
+
+      {/* Upcoming Reminders */}
+      <section aria-labelledby="reminders-title">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 id="reminders-title" className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+            Upcoming Reminders
+          </h2>
+        </div>
+        <SurfaceCard className="p-4">
+          <button
+            type="button"
+            className="flex w-full items-center gap-3 rounded-2xl p-1 text-left transition-colors hover:bg-white/[0.02] active:scale-[0.99]"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E]">
+              <CalendarClock className="h-5 w-5" strokeWidth={2} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[14px] font-semibold text-white">0 memberships expiring</p>
+              <p className="mt-0.5 truncate text-[12px] text-[#94A3B8]">No memberships expire this week.</p>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-[#64748B]" />
+          </button>
+        </SurfaceCard>
+      </section>
     </div>
   );
 }
