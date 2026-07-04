@@ -4,6 +4,8 @@ import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2 
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { PaymentHistoryScreen } from "@/components/screens/PaymentHistoryScreen";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { motion } from "framer-motion";
 
 interface Member {
   id: string;
@@ -103,22 +105,23 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
+          aria-label="Back"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-amber-400">Collect Payment</h1>
-          <p className="text-xs text-neutral-500">Record member fee payments</p>
+          <h1 className="text-[22px] font-bold tracking-tight text-white">Collect Payment</h1>
+          <p className="mt-0.5 text-[12px] text-[#94A3B8]">Record member fee payments</p>
         </div>
         <button
           onClick={() => setShowHistory(true)}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#F59E0B] transition-colors hover:text-white active:scale-95"
           aria-label="Payment history"
         >
           <History className="h-4 w-4" />
@@ -126,79 +129,82 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       </div>
 
       {/* Summary */}
-      <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-amber-600/5 p-4">
+      <SurfaceCard className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-amber-300/80">Total Collected</p>
-            <p className="mt-1 flex items-center text-2xl font-bold text-amber-300">
+            <p className="text-[12px] font-medium text-[#94A3B8]">Total Collected</p>
+            <p className="mt-1 flex items-center text-[24px] font-bold text-white">
               <IndianRupee className="h-5 w-5" />
               {totalCollected.toLocaleString("en-IN")}
             </p>
+            <p className="mt-1 text-[11px] text-[#64748B]">{payments.length} payment{payments.length === 1 ? "" : "s"} recorded</p>
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/20">
-            <Wallet className="h-6 w-6 text-amber-300" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F59E0B]/12 text-[#F59E0B]">
+            <Wallet className="h-5 w-5" />
           </div>
         </div>
-        <p className="mt-2 text-xs text-neutral-400">{payments.length} payment{payments.length === 1 ? "" : "s"} recorded</p>
-      </div>
+      </SurfaceCard>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
         <Input
           placeholder="Search member..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border-neutral-800 bg-neutral-900/60 pl-9 text-neutral-200 placeholder:text-neutral-600"
+          className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
         />
       </div>
 
       {/* List */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#22C55E]" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <Wallet className="mx-auto h-10 w-10 text-neutral-700" />
-          <p className="mt-3 text-sm text-neutral-500">No members found</p>
+          <Wallet className="mx-auto h-10 w-10 text-[#1F2937]" />
+          <p className="mt-3 text-[13px] text-[#64748B]">No members found</p>
         </div>
       ) : (
         <div className="space-y-2.5">
-          {filtered.map((m) => {
+          {filtered.map((m, idx) => {
             const last = latestPayment(m.id);
             return (
-              <div
+              <motion.div
                 key={m.id}
-                className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3.5"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(idx * 0.02, 0.2), duration: 0.25 }}
+                className="rounded-2xl border border-white/[0.06] bg-[#121821] p-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-neutral-100">{m.name}</p>
-                    {m.phone && <p className="mt-0.5 text-xs text-neutral-500">{m.phone}</p>}
+                    <p className="truncate text-[14px] font-semibold text-white">{m.name}</p>
+                    {m.phone && <p className="mt-0.5 text-[12px] text-[#94A3B8]">{m.phone}</p>}
                     {last && (
                       <div className="mt-1 space-y-1">
                         <p className="flex items-center gap-1 text-[11px]">
                           {isPaymentValid(last) ? (
                             <>
-                              <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                              <span className="text-emerald-400/90">PAID - {getDaysRemaining(last)} days left</span>
+                              <CheckCircle2 className="h-3 w-3 text-[#22C55E]" />
+                              <span className="font-medium text-[#22C55E]">PAID · {getDaysRemaining(last)} days left</span>
                             </>
                           ) : (
                             <>
-                              <div className="h-3 w-3 rounded-full border border-red-400 bg-transparent" />
-                              <span className="text-red-400/90">UNPAID - Payment expired</span>
+                              <div className="h-3 w-3 rounded-full border border-[#EF4444]" />
+                              <span className="font-medium text-[#EF4444]">UNPAID · expired</span>
                             </>
                           )}
                         </p>
-                        <p className="text-[10px] text-neutral-500">
+                        <p className="text-[10px] text-[#64748B]">
                           Last paid: ₹{Number(last.amount).toLocaleString("en-IN")} on {new Date(last.payment_date).toLocaleDateString("en-IN")}
                         </p>
                       </div>
                     )}
                     {!last && (
-                      <p className="mt-1 flex items-center gap-1 text-[11px] text-neutral-500">
-                        <div className="h-3 w-3 rounded-full border border-neutral-600 bg-transparent" />
+                      <p className="mt-1 flex items-center gap-1 text-[11px] text-[#64748B]">
+                        <span className="h-3 w-3 rounded-full border border-[#334155]" />
                         No payment yet
                       </p>
                     )}
@@ -206,7 +212,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                 </div>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
-                    <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-neutral-500" />
+                    <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
                     <Input
                       inputMode="numeric"
                       placeholder={`Amount (Default: ₹${defaultFee})`}
@@ -215,13 +221,13 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                         if (!amounts[m.id]) setAmounts((a) => ({ ...a, [m.id]: defaultFee.toString() }));
                       }}
                       onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
-                      className="h-9 border-neutral-800 bg-neutral-950/60 pl-7 text-sm text-neutral-100 placeholder:text-neutral-600"
+                      className="h-10 rounded-xl border-white/[0.06] bg-[#0B0F14] pl-7 text-[13px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
                     />
                   </div>
                   <button
                     onClick={() => handleCollect(m)}
                     disabled={savingId === m.id}
-                    className="flex h-9 items-center gap-1.5 rounded-lg bg-amber-500/90 px-3.5 text-xs font-semibold text-neutral-950 transition-colors hover:bg-amber-400 disabled:opacity-60"
+                    className="flex h-10 items-center gap-1.5 rounded-xl bg-[#22C55E] px-4 text-[12px] font-semibold text-[#0B0F14] transition-all hover:bg-[#22C55E]/90 active:scale-95 disabled:opacity-60"
                   >
                     {savingId === m.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -231,7 +237,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     Collect
                   </button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

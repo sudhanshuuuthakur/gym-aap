@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus, Users, Mail, Phone, MoreVertical, Pencil, Trash2, Eye } from "lucide-react";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { EditMemberDialog } from "@/components/EditMemberDialog";
 import { MemberProfileDialog } from "@/components/MemberProfileDialog";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,39 +80,47 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   };
 
   const statusColor: Record<string, string> = {
-    pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    approved: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-    rejected: "bg-red-500/20 text-red-400 border-red-500/30",
+    pending: "bg-[#F59E0B]/12 text-[#F59E0B] border-[#F59E0B]/30",
+    approved: "bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/30",
+    rejected: "bg-[#EF4444]/12 text-[#EF4444] border-[#EF4444]/30",
   };
 
   return (
     <>
-      <Card className="border-neutral-800 bg-neutral-900/50 backdrop-blur-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-neutral-200">
-            <Users className="h-5 w-5" /> New Admissions
-          </CardTitle>
-          <Button size="sm" onClick={() => setAddOpen(true)}>
-            <UserPlus className="mr-2 h-4 w-4" /> Add
-          </Button>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-[22px] font-bold tracking-tight text-white">Members</h1>
+            <p className="mt-0.5 text-[12px] text-[#94A3B8]">All admissions</p>
+          </div>
+          <button
+            onClick={() => setAddOpen(true)}
+            className="flex h-10 items-center gap-1.5 rounded-full bg-[#22C55E] px-4 text-[13px] font-semibold text-[#0B0F14] transition-all hover:bg-[#22C55E]/90 active:scale-95"
+          >
+            <UserPlus className="h-4 w-4" /> Add
+          </button>
+        </div>
+        <SurfaceCard className="p-4">
           {loading ? (
-            <p className="text-neutral-500 text-sm">Loading...</p>
+            <p className="py-6 text-center text-[13px] text-[#64748B]">Loading…</p>
           ) : admissions.length === 0 ? (
-            <p className="text-neutral-500 text-sm text-center py-6">
-              No admissions yet. Click "Add" to create one.
-            </p>
+            <div className="py-10 text-center">
+              <Users className="mx-auto h-10 w-10 text-[#1F2937]" />
+              <p className="mt-3 text-[13px] text-[#64748B]">No admissions yet. Tap Add to create one.</p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              {admissions.map((admission) => (
-                <div
+            <div className="space-y-2">
+              {admissions.map((admission, idx) => (
+                <motion.div
                   key={admission.id}
-                  className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-800/40 p-4"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(idx * 0.02, 0.2), duration: 0.25 }}
+                  className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-[#181F2A] p-4"
                 >
                   <div className="space-y-1">
-                    <p className="font-medium text-neutral-100">{admission.name}</p>
-                    <div className="flex flex-wrap gap-3 text-xs text-neutral-400">
+                    <p className="text-[14px] font-semibold text-white">{admission.name}</p>
+                    <div className="flex flex-wrap gap-3 text-[11px] text-[#94A3B8]">
                       {admission.email && (
                         <span className="flex items-center gap-1">
                           <Mail className="h-3 w-3" /> {admission.email}
@@ -131,14 +139,14 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
                   <div className="flex items-center gap-2">
                     <Badge
                       variant="outline"
-                      className={statusColor[admission.status] || "text-neutral-400"}
+                      className={statusColor[admission.status] || "text-[#94A3B8]"}
                     >
                       {admission.status}
                     </Badge>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-700/60 hover:text-neutral-100"
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-[#94A3B8] transition-colors hover:bg-white/[0.06] hover:text-white"
                           aria-label="Member actions"
                         >
                           <MoreVertical className="h-4 w-4" />
@@ -146,35 +154,35 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="border-neutral-800 bg-neutral-900 text-neutral-100"
+                        className="border-white/[0.06] bg-[#121821] text-white"
                       >
                         <DropdownMenuItem
                           onClick={() => setViewing(admission)}
-                          className="focus:bg-neutral-800 focus:text-neutral-100"
+                          className="focus:bg-white/[0.06] focus:text-white"
                         >
                           <Eye className="mr-2 h-4 w-4" /> View profile
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setEditing(admission)}
-                          className="focus:bg-neutral-800 focus:text-neutral-100"
+                          className="focus:bg-white/[0.06] focus:text-white"
                         >
                           <Pencil className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeleting(admission)}
-                          className="text-red-400 focus:bg-red-500/10 focus:text-red-400"
+                          className="text-[#EF4444] focus:bg-[#EF4444]/10 focus:text-[#EF4444]"
                         >
                           <Trash2 className="mr-2 h-4 w-4" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </SurfaceCard>
+      </div>
 
       <AddAdmissionDialog
         open={addOpen}
@@ -197,21 +205,21 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
       />
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <AlertDialogContent className="border-neutral-800 bg-neutral-900 text-neutral-100">
+        <AlertDialogContent className="border-white/[0.06] bg-[#121821] text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleting?.name}?</AlertDialogTitle>
-            <AlertDialogDescription className="text-neutral-400">
+            <AlertDialogDescription className="text-[#94A3B8]">
               This permanently removes the member and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-neutral-700 bg-neutral-800 text-neutral-100 hover:bg-neutral-700 hover:text-neutral-100">
+            <AlertDialogCancel className="border-white/[0.06] bg-[#181F2A] text-white hover:bg-white/[0.06] hover:text-white">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteLoading}
-              className="bg-red-600 text-white hover:bg-red-500"
+              className="bg-[#EF4444] text-white hover:bg-[#EF4444]/90"
             >
               {deleteLoading ? "Deleting..." : "Delete"}
             </AlertDialogAction>
