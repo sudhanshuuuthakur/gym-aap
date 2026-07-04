@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Search, Users, CheckCircle2, Clock, MessageCircle, MessageSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { motion } from "framer-motion";
 
 export type MemberFilter = "all" | "paid" | "notpaid";
 
@@ -31,9 +33,9 @@ interface MemberListScreenProps {
 }
 
 const filterConfig = {
-  all: { title: "Total Members", icon: Users, accent: "text-neutral-300" },
-  paid: { title: "Paid Members", icon: CheckCircle2, accent: "text-emerald-400" },
-  notpaid: { title: "Unpaid Members", icon: Clock, accent: "text-red-400" },
+  all: { title: "Total Members", icon: Users },
+  paid: { title: "Paid Members", icon: CheckCircle2 },
+  notpaid: { title: "Unpaid Members", icon: Clock },
 };
 
 export function MemberListScreen({ userId, filter, onBack }: MemberListScreenProps) {
@@ -183,48 +185,49 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
+          aria-label="Back"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex-1">
-          <h1 className={`text-xl font-bold ${config.accent}`}>{config.title}</h1>
+          <h1 className="text-[22px] font-bold tracking-tight text-white">{config.title}</h1>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full bg-neutral-800/60 px-3 py-1 text-xs font-medium text-neutral-300">
-          <Icon className="h-3.5 w-3.5" />
+        <span className="flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-[#121821] px-3 py-1 text-[12px] font-medium text-[#94A3B8]">
+          <Icon className="h-3.5 w-3.5 text-[#22C55E]" />
           {filteredByStatus.length}
         </span>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
         <Input
           placeholder="Search members..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border-neutral-800 bg-neutral-900/60 pl-9 text-neutral-200 placeholder:text-neutral-600"
+          className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
         />
       </div>
 
       {/* Member List */}
       {loading ? (
-        <div className="py-12 text-center text-sm text-neutral-500">Loading members...</div>
+        <div className="py-12 text-center text-[13px] text-[#64748B]">Loading members…</div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <Icon className="mx-auto h-10 w-10 text-neutral-700" />
-          <p className="mt-3 text-sm text-neutral-500">
+          <Icon className="mx-auto h-10 w-10 text-[#1F2937]" />
+          <p className="mt-3 text-[13px] text-[#64748B]">
             {search ? "No members match your search" : "No members in this category"}
           </p>
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((member) => {
+          {filtered.map((member, idx) => {
             const lastPayment = getLatestPayment(member.id);
             const isPaid = isPaymentValid(lastPayment);
             const daysRemaining = getDaysRemaining(lastPayment);
@@ -233,26 +236,29 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
             const gymName = profile?.display_name || "Your Gym";
             const contactNumber = profile?.phone || "";
             return (
-              <div
+              <motion.div
                 key={member.id}
-                className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 px-4 py-3.5 transition-colors hover:bg-neutral-800/40"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(idx * 0.02, 0.2), duration: 0.25 }}
+                className="rounded-2xl border border-white/[0.06] bg-[#121821] px-4 py-3.5 transition-colors hover:bg-[#181F2A]"
               >
                 <div className="flex items-center justify-between">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-neutral-100">
+                    <p className="truncate text-[14px] font-semibold text-white">
                       {member.name}
                     </p>
                     {member.phone && (
-                      <p className="mt-0.5 text-xs text-neutral-500">{member.phone}</p>
+                      <p className="mt-0.5 text-[12px] text-[#94A3B8]">{member.phone}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 pl-3">
-                    <span className="text-[10px] font-medium text-neutral-500">
+                    <span className="text-[10px] font-medium text-[#94A3B8]">
                       {isPaid ? `Paid (${daysRemaining}d)` : "Unpaid"}
                     </span>
                     <span
                       className={`h-3 w-3 shrink-0 rounded-full ${
-                        isPaid ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]" : "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]"
+                        isPaid ? "bg-[#22C55E] shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-[#EF4444] shadow-[0_0_8px_rgba(239,68,68,0.5)]"
                       }`}
                     />
                   </div>
@@ -271,7 +277,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                         })
                       }
                       disabled={!member.phone}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#22C55E]/20 bg-[#22C55E]/8 px-3 py-2 text-[12px] font-semibold text-[#22C55E] transition-all hover:bg-[#22C55E]/15 active:scale-95 disabled:opacity-40"
                     >
                       <MessageCircle className="h-3.5 w-3.5" />
                       WhatsApp
@@ -288,14 +294,14 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                         })
                       }
                       disabled={!member.phone}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-sky-500/10 px-3 py-2 text-xs font-medium text-sky-400 transition-colors hover:bg-sky-500/20 disabled:opacity-40"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#3B82F6]/20 bg-[#3B82F6]/8 px-3 py-2 text-[12px] font-semibold text-[#3B82F6] transition-all hover:bg-[#3B82F6]/15 active:scale-95 disabled:opacity-40"
                     >
                       <MessageSquare className="h-3.5 w-3.5" />
                       SMS
                     </button>
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
           })}
         </div>

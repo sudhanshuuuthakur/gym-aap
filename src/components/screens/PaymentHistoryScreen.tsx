@@ -15,6 +15,7 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Input } from "@/components/ui/input";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { SurfaceCard } from "@/components/premium/SurfaceCard";
 
 interface PaymentRecord {
   id: string;
@@ -174,38 +175,39 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
   const canGoForward = !isCurrentOrFutureMonth(nextMonth(selectedMonth));
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-800/60 text-neutral-300 transition-colors hover:bg-neutral-700"
+          aria-label="Back"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-amber-400">Payment History</h1>
-          <p className="text-xs text-neutral-500">Monthly collection records & analytics</p>
+          <h1 className="text-[22px] font-bold tracking-tight text-white">Payment History</h1>
+          <p className="mt-0.5 text-[12px] text-[#94A3B8]">Monthly collection & analytics</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-xl border border-neutral-800/60 bg-neutral-900/40 px-2 py-2">
+      <div className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-[#121821] px-2 py-2">
         <button
           onClick={() => setSelectedMonth((m) => previousMonth(m))}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-white/[0.04] hover:text-white"
           aria-label="Previous month"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <div className="text-center">
-          <p className="text-sm font-semibold text-neutral-100">{monthLabel}</p>
-          <p className="text-[10px] text-neutral-500">
+          <p className="text-[14px] font-semibold text-white">{monthLabel}</p>
+          <p className="text-[10px] text-[#64748B]">
             {stats.count} transaction{stats.count === 1 ? "" : "s"}
           </p>
         </div>
         <button
           onClick={() => canGoForward && setSelectedMonth((m) => nextMonth(m))}
           disabled={!canGoForward}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-neutral-200 disabled:opacity-30 disabled:hover:bg-transparent"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-white/[0.04] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent"
           aria-label="Next month"
         >
           <ChevronRight className="h-5 w-5" />
@@ -214,18 +216,18 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
+          <Loader2 className="h-6 w-6 animate-spin text-[#22C55E]" />
         </div>
       ) : (
         <>
-          <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-amber-600/5 p-4">
-            <p className="text-xs text-amber-300/80">Total Collected</p>
-            <p className="mt-1 flex items-center text-3xl font-bold text-amber-300">
+          <SurfaceCard className="p-5">
+            <p className="text-[12px] font-medium text-[#94A3B8]">Total Collected</p>
+            <p className="mt-1 flex items-center text-[28px] font-bold text-white">
               <IndianRupee className="h-6 w-6" />
               {stats.total.toLocaleString("en-IN")}
             </p>
             {comparison && (
-              <p className={`mt-2 flex items-center gap-1 text-xs ${comparison.up ? "text-emerald-400" : "text-red-400"}`}>
+              <p className={`mt-2 flex items-center gap-1 text-[12px] font-medium ${comparison.up ? "text-[#22C55E]" : "text-[#EF4444]"}`}>
                 {comparison.up ? (
                   <TrendingUp className="h-3.5 w-3.5" />
                 ) : (
@@ -234,33 +236,33 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                 {comparison.pct}% vs {previousMonth(selectedMonth).toLocaleDateString("en-IN", { month: "short" })}
               </p>
             )}
-          </div>
+          </SurfaceCard>
 
           <div className="grid grid-cols-3 gap-2.5">
-            <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3 text-center">
-              <Receipt className="mx-auto h-4 w-4 text-amber-400/80" />
-              <p className="mt-1.5 text-lg font-bold text-neutral-100">{stats.count}</p>
-              <p className="text-[10px] text-neutral-500">Payments</p>
-            </div>
-            <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3 text-center">
-              <Users className="mx-auto h-4 w-4 text-emerald-400/80" />
-              <p className="mt-1.5 text-lg font-bold text-neutral-100">{stats.uniqueMembers}</p>
-              <p className="text-[10px] text-neutral-500">Members</p>
-            </div>
-            <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-3 text-center">
-              <IndianRupee className="mx-auto h-4 w-4 text-blue-400/80" />
-              <p className="mt-1.5 text-lg font-bold text-neutral-100">{stats.average.toLocaleString("en-IN")}</p>
-              <p className="text-[10px] text-neutral-500">Avg / payment</p>
-            </div>
+            <SurfaceCard className="p-3.5 text-center">
+              <Receipt className="mx-auto h-4 w-4 text-[#F59E0B]" />
+              <p className="mt-1.5 text-[18px] font-bold text-white">{stats.count}</p>
+              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Payments</p>
+            </SurfaceCard>
+            <SurfaceCard className="p-3.5 text-center">
+              <Users className="mx-auto h-4 w-4 text-[#22C55E]" />
+              <p className="mt-1.5 text-[18px] font-bold text-white">{stats.uniqueMembers}</p>
+              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Members</p>
+            </SurfaceCard>
+            <SurfaceCard className="p-3.5 text-center">
+              <IndianRupee className="mx-auto h-4 w-4 text-[#3B82F6]" />
+              <p className="mt-1.5 text-[18px] font-bold text-white">{stats.average.toLocaleString("en-IN")}</p>
+              <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Avg</p>
+            </SurfaceCard>
           </div>
 
           {stats.count > 0 && (
-            <div className="rounded-xl border border-neutral-800/60 bg-neutral-900/40 p-4">
-              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <SurfaceCard className="p-4">
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
                 Daily Collection
               </p>
               <ChartContainer
-                config={{ amount: { label: "Amount", color: "hsl(38 92% 50%)" } }}
+                config={{ amount: { label: "Amount", color: "#22C55E" } }}
                 className="aspect-[2/1] h-[140px] w-full"
               >
                 <BarChart data={dailyChartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
@@ -269,7 +271,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                     dataKey="day"
                     tickLine={false}
                     axisLine={false}
-                    tick={{ fill: "#737373", fontSize: 10 }}
+                    tick={{ fill: "#64748B", fontSize: 10 }}
                     interval="preserveStartEnd"
                   />
                   <ChartTooltip
@@ -283,23 +285,23 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                   <Bar dataKey="amount" fill="var(--color-amount)" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ChartContainer>
-            </div>
+            </SurfaceCard>
           )}
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#64748B]" />
             <Input
               placeholder="Search by member or date..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border-neutral-800 bg-neutral-900/60 pl-9 text-neutral-200 placeholder:text-neutral-600"
+              className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
             />
           </div>
 
           {filteredPayments.length === 0 ? (
             <div className="py-12 text-center">
-              <Receipt className="mx-auto h-10 w-10 text-neutral-700" />
-              <p className="mt-3 text-sm text-neutral-500">
+              <Receipt className="mx-auto h-10 w-10 text-[#1F2937]" />
+              <p className="mt-3 text-[13px] text-[#64748B]">
                 {stats.count === 0
                   ? `No payments recorded in ${monthLabel}`
                   : "No matching payments"}
@@ -312,7 +314,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                 return (
                   <div key={date}>
                     <div className="mb-2 flex items-center justify-between px-1">
-                      <p className="text-xs font-medium text-neutral-400">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
                         {new Date(date + "T00:00:00").toLocaleDateString("en-IN", {
                           weekday: "short",
                           day: "numeric",
@@ -320,7 +322,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                           year: "numeric",
                         })}
                       </p>
-                      <p className="text-xs font-semibold text-amber-400/90">
+                      <p className="text-[12px] font-semibold text-[#22C55E]">
                         ₹{dayTotal.toLocaleString("en-IN")}
                       </p>
                     </div>
@@ -328,17 +330,17 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                       {records.map((p) => (
                         <div
                           key={p.id}
-                          className="flex items-center justify-between rounded-xl border border-neutral-800/60 bg-neutral-900/40 px-3.5 py-3"
+                          className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-[#121821] px-4 py-3"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium text-neutral-100">
+                            <p className="truncate text-[14px] font-semibold text-white">
                               {members[p.admission_id] ?? "Unknown member"}
                             </p>
-                            <p className="mt-0.5 text-[10px] capitalize text-neutral-500">
+                            <p className="mt-0.5 text-[11px] capitalize text-[#64748B]">
                               {p.method || "cash"}
                             </p>
                           </div>
-                          <p className="flex items-center text-sm font-semibold text-emerald-400">
+                          <p className="flex items-center text-[14px] font-semibold text-[#22C55E]">
                             <IndianRupee className="h-3.5 w-3.5" />
                             {Number(p.amount).toLocaleString("en-IN")}
                           </p>
