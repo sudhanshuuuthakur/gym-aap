@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Phone, Lock } from "lucide-react";
+import { Phone, Lock, Dumbbell } from "lucide-react";
 import { toast } from "sonner";
 
 type Mode = "login" | "signup";
@@ -71,15 +71,15 @@ export function PhoneLoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#0d1117]/65 backdrop-blur-xl p-8 shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
+    <div className="w-full max-w-sm rounded-[22px] border border-white/[0.06] bg-[#121821]/95 backdrop-blur-xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
       <div className="text-center space-y-3">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#1a2332]/80 border border-[#2a3a50]">
-          <Phone className="h-7 w-7 text-[#5ec3ff]" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#22C55E]/12 border border-[#22C55E]/25">
+          <Dumbbell className="h-6 w-6 text-[#22C55E]" strokeWidth={2.25} />
         </div>
-        <h2 className="text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-[26px] font-bold tracking-tight text-white">
           {mode === "login" ? "Gym Manager" : "Create account"}
         </h2>
-        <p className="text-sm text-[#94a3b8]">
+        <p className="text-[13px] text-[#94A3B8]">
           {mode === "login"
             ? "Sign in with your phone number & PIN"
             : "New user? Enter your 10-digit phone number and choose a 6-digit PIN"}
@@ -88,7 +88,7 @@ export function PhoneLoginForm() {
 
       <div className="space-y-5 mt-8">
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-[#64748b] flex items-center gap-1.5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-[#64748B] flex items-center gap-1.5">
             <Phone className="h-3.5 w-3.5" /> Phone number
           </label>
           <Input
@@ -98,12 +98,12 @@ export function PhoneLoginForm() {
             placeholder="10-digit phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            className="bg-[#111827]/70 border-[#2a3a50] text-white placeholder:text-[#475569] h-11 focus-visible:ring-[#5ec3ff]/40 focus-visible:border-[#5ec3ff]/60"
+            className="bg-[#181F2A] border-white/[0.06] text-white placeholder:text-[#475569] h-11 rounded-xl focus-visible:ring-[#22C55E]/40 focus-visible:border-[#22C55E]/60"
           />
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wide text-[#64748b] flex items-center gap-1.5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-[#64748B] flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5" /> 6-digit PIN
           </label>
           <div className="flex justify-center">
@@ -113,7 +113,7 @@ export function PhoneLoginForm() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="bg-[#111827]/70 border-[#2a3a50] text-white h-12 w-11 text-lg focus-visible:ring-[#5ec3ff]/40 focus-visible:border-[#5ec3ff]/60"
+                    className="bg-[#181F2A] border-white/[0.06] text-white h-12 w-11 text-lg rounded-xl focus-visible:ring-[#22C55E]/40 focus-visible:border-[#22C55E]/60"
                   />
                 ))}
               </InputOTPGroup>
@@ -124,7 +124,7 @@ export function PhoneLoginForm() {
         <Button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full h-11 bg-[#5ec3ff] hover:bg-[#7dd1ff] text-[#0b1120] font-semibold shadow-[0_4px_14px_rgba(94,195,255,0.25)] transition-all"
+          className="w-full h-11 rounded-full bg-[#22C55E] hover:bg-[#22C55E]/90 text-[#0B0F14] font-semibold shadow-[0_8px_24px_rgba(34,197,94,0.25)] transition-all active:scale-[0.98]"
         >
           {loading
             ? "Please wait..."
@@ -138,7 +138,7 @@ export function PhoneLoginForm() {
             setMode(mode === "login" ? "signup" : "login");
             setPin("");
           }}
-          className="w-full text-sm text-[#94a3b8] hover:text-[#5ec3ff] transition-colors"
+          className="w-full text-[13px] text-[#94A3B8] hover:text-[#22C55E] transition-colors"
         >
           {mode === "login"
             ? "Don't have an account? Sign up"
