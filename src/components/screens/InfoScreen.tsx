@@ -15,7 +15,7 @@ export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[24px] font-bold tracking-tight text-white">Info</h1>
+        <h1 className="text-[24px] font-bold tracking-tight text-[#0F172A]">Info</h1>
         <p className="mt-1 text-[13px] text-[#64748B]">Account and preferences</p>
       </div>
 
@@ -25,7 +25,7 @@ export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
             <User className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold text-white">{greeting}</p>
+            <p className="truncate text-[15px] font-semibold text-[#0F172A]">{greeting}</p>
             <p className="text-[12px] text-[#94A3B8]">Signed in</p>
           </div>
         </div>
@@ -36,13 +36,13 @@ export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
           onClick={onEditProfile}
           className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06] text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F1F5F9] text-[#0F172A]">
             <Settings className="h-4 w-4" strokeWidth={2} />
           </div>
-          <span className="flex-1 text-[14px] font-medium text-white">Edit Profile</span>
+          <span className="flex-1 text-[14px] font-medium text-[#0F172A]">Edit Profile</span>
           <ChevronRight className="h-4 w-4 text-[#64748B]" />
         </button>
-        <div className="mx-3 h-px bg-white/[0.06]" />
+        <div className="mx-3 h-px bg-[#F1F5F9]" />
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"

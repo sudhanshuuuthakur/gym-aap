@@ -101,12 +101,12 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
         <button
           onClick={onBack}
           aria-label="Back"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex-1">
-          <h1 className="text-[22px] font-bold tracking-tight text-white">Attendance</h1>
+          <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Attendance</h1>
           <p className="mt-0.5 flex items-center gap-1.5 text-[12px] text-[#94A3B8]">
             <CalendarDays className="h-3.5 w-3.5" />
             {todayDisplay}
@@ -119,13 +119,13 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[12px] font-medium text-[#94A3B8]">Attendance Rate</p>
-            <p className="mt-1 text-[24px] font-bold leading-none text-white">{attendancePercent}%</p>
+            <p className="mt-1 text-[24px] font-bold leading-none text-[#0F172A]">{attendancePercent}%</p>
           </div>
           <div className="text-right text-[12px] text-[#94A3B8]">
-            <p><span className="font-semibold text-white">{presentCount}</span> / {members.length} present</p>
+            <p><span className="font-semibold text-[#0F172A]">{presentCount}</span> / {members.length} present</p>
           </div>
         </div>
-        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
+        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[#F1F5F9]">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${attendancePercent}%` }}
@@ -139,17 +139,17 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
       <div className="grid grid-cols-3 gap-2.5">
         <SurfaceCard className="p-3.5 text-center">
           <UserCheck className="mx-auto h-4 w-4 text-[#22C55E]" />
-          <p className="mt-1.5 text-[18px] font-bold text-white">{presentCount}</p>
+          <p className="mt-1.5 text-[18px] font-bold text-[#0F172A]">{presentCount}</p>
           <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Present</p>
         </SurfaceCard>
         <SurfaceCard className="p-3.5 text-center">
           <UserX className="mx-auto h-4 w-4 text-[#EF4444]" />
-          <p className="mt-1.5 text-[18px] font-bold text-white">{absentCount}</p>
+          <p className="mt-1.5 text-[18px] font-bold text-[#0F172A]">{absentCount}</p>
           <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Absent</p>
         </SurfaceCard>
         <SurfaceCard className="p-3.5 text-center">
           <Users className="mx-auto h-4 w-4 text-[#94A3B8]" />
-          <p className="mt-1.5 text-[18px] font-bold text-white">{members.length}</p>
+          <p className="mt-1.5 text-[18px] font-bold text-[#0F172A]">{members.length}</p>
           <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Total</p>
         </SurfaceCard>
       </div>
@@ -161,7 +161,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
           placeholder="Search member..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
+          className="h-11 rounded-2xl border-[#E2E8F0] bg-[#FFFFFF] pl-9 text-[14px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
         />
       </div>
 
@@ -170,7 +170,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
         <div className="py-12 text-center text-[13px] text-[#64748B]">Loading members…</div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-12">
-          <Users className="h-10 w-10 text-[#1F2937]" />
+          <Users className="h-10 w-10 text-[#CBD5E1]" />
           <p className="text-[13px] text-[#64748B]">
             {members.length === 0 ? "No members yet." : "No results found."}
           </p>
@@ -189,7 +189,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
                 className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-all active:scale-[0.98] ${
                   isPresent
                     ? "border-[#22C55E]/30 bg-[#22C55E]/8"
-                    : "border-white/[0.06] bg-[#121821] hover:bg-[#181F2A]"
+                    : "border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F1F5F9]"
                 }`}
               >
                 {isPresent ? (
@@ -198,7 +198,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
                   <Circle className="h-6 w-6 shrink-0 text-[#64748B]" />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[14px] font-semibold text-white">{member.name}</p>
+                  <p className="truncate text-[14px] font-semibold text-[#0F172A]">{member.name}</p>
                   {member.phone && (
                     <p className="mt-0.5 text-[12px] text-[#94A3B8]">{member.phone}</p>
                   )}
@@ -207,7 +207,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
                   className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
                     isPresent
                       ? "border-[#22C55E]/30 bg-[#22C55E]/12 text-[#22C55E]"
-                      : "border-white/[0.06] bg-white/[0.03] text-[#94A3B8]"
+                      : "border-[#E2E8F0] bg-white/[0.03] text-[#94A3B8]"
                   }`}
                 >
                   {isPresent ? "Present" : "Absent"}

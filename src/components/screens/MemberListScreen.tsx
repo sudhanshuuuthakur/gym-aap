@@ -191,14 +191,14 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
         <button
           onClick={onBack}
           aria-label="Back"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="flex-1">
-          <h1 className="text-[22px] font-bold tracking-tight text-white">{config.title}</h1>
+          <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">{config.title}</h1>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-[#121821] px-3 py-1 text-[12px] font-medium text-[#94A3B8]">
+        <span className="flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#FFFFFF] px-3 py-1 text-[12px] font-medium text-[#94A3B8]">
           <Icon className="h-3.5 w-3.5 text-[#22C55E]" />
           {filteredByStatus.length}
         </span>
@@ -211,7 +211,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
           placeholder="Search members..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
+          className="h-11 rounded-2xl border-[#E2E8F0] bg-[#FFFFFF] pl-9 text-[14px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
         />
       </div>
 
@@ -220,7 +220,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
         <div className="py-12 text-center text-[13px] text-[#64748B]">Loading members…</div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <Icon className="mx-auto h-10 w-10 text-[#1F2937]" />
+          <Icon className="mx-auto h-10 w-10 text-[#CBD5E1]" />
           <p className="mt-3 text-[13px] text-[#64748B]">
             {search ? "No members match your search" : "No members in this category"}
           </p>
@@ -241,11 +241,11 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(idx * 0.02, 0.2), duration: 0.25 }}
-                className="rounded-2xl border border-white/[0.06] bg-[#121821] px-4 py-3.5 transition-colors hover:bg-[#181F2A]"
+                className="rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3.5 transition-colors hover:bg-[#F1F5F9]"
               >
                 <div className="flex items-center justify-between">
                   <div className="min-w-0">
-                    <p className="truncate text-[14px] font-semibold text-white">
+                    <p className="truncate text-[14px] font-semibold text-[#0F172A]">
                       {member.name}
                     </p>
                     {member.phone && (

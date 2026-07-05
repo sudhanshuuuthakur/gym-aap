@@ -79,10 +79,10 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
   return (
     <SurfaceCard className="p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-semibold tracking-tight text-white">Membership Overview</h2>
+        <h2 className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Membership Overview</h2>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-[#181F2A] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-[#0F172A]"
         >
           This Month
           <ChevronDown className="h-3.5 w-3.5" />
@@ -96,23 +96,23 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
       </div>
 
       {/* Payment collection */}
-      <div className="mt-5 rounded-2xl border border-white/[0.06] bg-[#181F2A] p-4">
+      <div className="mt-5 rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E]">
               <TrendingUp className="h-4 w-4" strokeWidth={2} />
             </div>
             <div>
-              <p className="text-[13px] font-medium text-white">Payment Collection</p>
+              <p className="text-[13px] font-medium text-[#0F172A]">Payment Collection</p>
               <p className="text-[11px] text-[#94A3B8]">{paid} of {total} members</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[18px] font-bold leading-none text-white">{paidPercent}%</p>
+            <p className="text-[18px] font-bold leading-none text-[#0F172A]">{paidPercent}%</p>
             <p className="mt-1 text-[11px] font-medium text-[#22C55E]">{collectionLabel}</p>
           </div>
         </div>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/[0.06]" role="progressbar" aria-valuenow={paidPercent} aria-valuemin={0} aria-valuemax={100}>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#F1F5F9]" role="progressbar" aria-valuenow={paidPercent} aria-valuemin={0} aria-valuemax={100}>
           <div
             className="h-full rounded-full bg-[#22C55E] transition-[width] duration-500"
             style={{ width: `${paidPercent}%` }}

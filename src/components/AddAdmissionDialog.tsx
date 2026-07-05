@@ -143,7 +143,7 @@ export function AddAdmissionDialog({
                     ),
                     head_cell: "text-neutral-400 rounded-md w-9 font-normal text-[0.8rem]",
                     day: "h-9 w-9 p-0 font-normal text-neutral-200 hover:bg-neutral-700 rounded-md inline-flex items-center justify-center",
-                    day_selected: "bg-emerald-600 text-white hover:bg-emerald-500 focus:bg-emerald-600",
+                    day_selected: "bg-emerald-600 text-[#0F172A] hover:bg-emerald-500 focus:bg-emerald-600",
                     day_today: "bg-neutral-700 text-neutral-100",
                     day_outside: "text-neutral-600 opacity-50",
                     day_disabled: "text-neutral-600 opacity-50",

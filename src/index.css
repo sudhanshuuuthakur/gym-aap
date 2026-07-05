@@ -9,11 +9,11 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Premium dark SaaS palette (Apple / Linear / Stripe / Notion) */
-    --background: 210 30% 6%;          /* #0B0F14 */
+    --background: 210 30% 6%;          /* #FFFFFF */
     --foreground: 0 0% 100%;
 
-    --surface: 214 25% 10%;            /* #121821 */
-    --surface-2: 217 22% 13%;          /* #181F2A */
+    --surface: 214 25% 10%;            /* #FFFFFF */
+    --surface-2: 217 22% 13%;          /* #F1F5F9 */
 
     --card: 214 25% 10%;
     --card-foreground: 0 0% 100%;
@@ -95,7 +95,7 @@ All colors MUST be HSL.
 
 @layer base {
   * {
-    @apply border-white/[0.06];
+    @apply border-[#E2E8F0];
   }
 
   body {

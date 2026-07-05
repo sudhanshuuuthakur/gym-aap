@@ -39,7 +39,7 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
       transition={{ duration: 0.3, delay: 0.05 * index, ease: [0.22, 1, 0.36, 1] }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "group relative flex h-full min-h-[148px] w-full flex-col items-start justify-between overflow-hidden rounded-[22px] border border-white/[0.06] bg-[#121821] p-5 text-left transition-colors hover:bg-[#151C27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/50",
+        "group relative flex h-full min-h-[148px] w-full flex-col items-start justify-between overflow-hidden rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF] p-5 text-left transition-colors hover:bg-[#151C27] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/50",
       )}
       aria-label={title}
     >
@@ -50,7 +50,7 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
       <div className="relative w-full">
         <div className="flex items-end justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold text-white">{title}</p>
+            <p className="truncate text-[15px] font-semibold text-[#0F172A]">{title}</p>
             <p className="mt-0.5 truncate text-[12px] text-[#94A3B8]">{subtitle}</p>
           </div>
           <ArrowUpRight className={cn("h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5", t.arrow)} />
