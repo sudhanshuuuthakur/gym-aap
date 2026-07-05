@@ -48,12 +48,12 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
         <Icon className="h-5 w-5" strokeWidth={2} />
       </div>
       <div className="relative w-full">
-        <div className="flex items-end justify-between gap-2">
-          <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold text-[#0F172A]">{title}</p>
-            <p className="mt-0.5 truncate text-[12px] text-[#94A3B8]">{subtitle}</p>
+        <div className="flex items-end justify-between gap-1.5">
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-semibold leading-tight text-[#0F172A] break-words">{title}</p>
+            <p className="mt-0.5 text-[11px] leading-tight text-[#94A3B8] break-words">{subtitle}</p>
           </div>
-          <ArrowUpRight className={cn("h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5", t.arrow)} />
+          <ArrowUpRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5", t.arrow)} />
         </div>
       </div>
     </motion.button>
