@@ -180,26 +180,26 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
         <button
           onClick={onBack}
           aria-label="Back"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-[22px] font-bold tracking-tight text-white">Payment History</h1>
+          <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Payment History</h1>
           <p className="mt-0.5 text-[12px] text-[#94A3B8]">Monthly collection & analytics</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-[#121821] px-2 py-2">
+      <div className="flex items-center justify-between rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-2 py-2">
         <button
           onClick={() => setSelectedMonth((m) => previousMonth(m))}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-white/[0.04] hover:text-white"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-white/[0.04] hover:text-[#0F172A]"
           aria-label="Previous month"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <div className="text-center">
-          <p className="text-[14px] font-semibold text-white">{monthLabel}</p>
+          <p className="text-[14px] font-semibold text-[#0F172A]">{monthLabel}</p>
           <p className="text-[10px] text-[#64748B]">
             {stats.count} transaction{stats.count === 1 ? "" : "s"}
           </p>
@@ -207,7 +207,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
         <button
           onClick={() => canGoForward && setSelectedMonth((m) => nextMonth(m))}
           disabled={!canGoForward}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-white/[0.04] hover:text-white disabled:opacity-30 disabled:hover:bg-transparent"
+          className="flex h-9 w-9 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:bg-white/[0.04] hover:text-[#0F172A] disabled:opacity-30 disabled:hover:bg-transparent"
           aria-label="Next month"
         >
           <ChevronRight className="h-5 w-5" />
@@ -222,7 +222,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
         <>
           <SurfaceCard className="p-5">
             <p className="text-[12px] font-medium text-[#94A3B8]">Total Collected</p>
-            <p className="mt-1 flex items-center text-[28px] font-bold text-white">
+            <p className="mt-1 flex items-center text-[28px] font-bold text-[#0F172A]">
               <IndianRupee className="h-6 w-6" />
               {stats.total.toLocaleString("en-IN")}
             </p>
@@ -241,17 +241,17 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
           <div className="grid grid-cols-3 gap-2.5">
             <SurfaceCard className="p-3.5 text-center">
               <Receipt className="mx-auto h-4 w-4 text-[#F59E0B]" />
-              <p className="mt-1.5 text-[18px] font-bold text-white">{stats.count}</p>
+              <p className="mt-1.5 text-[18px] font-bold text-[#0F172A]">{stats.count}</p>
               <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Payments</p>
             </SurfaceCard>
             <SurfaceCard className="p-3.5 text-center">
               <Users className="mx-auto h-4 w-4 text-[#22C55E]" />
-              <p className="mt-1.5 text-[18px] font-bold text-white">{stats.uniqueMembers}</p>
+              <p className="mt-1.5 text-[18px] font-bold text-[#0F172A]">{stats.uniqueMembers}</p>
               <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Members</p>
             </SurfaceCard>
             <SurfaceCard className="p-3.5 text-center">
               <IndianRupee className="mx-auto h-4 w-4 text-[#3B82F6]" />
-              <p className="mt-1.5 text-[18px] font-bold text-white">{stats.average.toLocaleString("en-IN")}</p>
+              <p className="mt-1.5 text-[18px] font-bold text-[#0F172A]">{stats.average.toLocaleString("en-IN")}</p>
               <p className="text-[10px] uppercase tracking-wider text-[#64748B]">Avg</p>
             </SurfaceCard>
           </div>
@@ -294,13 +294,13 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
               placeholder="Search by member or date..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
+              className="h-11 rounded-2xl border-[#E2E8F0] bg-[#FFFFFF] pl-9 text-[14px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
             />
           </div>
 
           {filteredPayments.length === 0 ? (
             <div className="py-12 text-center">
-              <Receipt className="mx-auto h-10 w-10 text-[#1F2937]" />
+              <Receipt className="mx-auto h-10 w-10 text-[#CBD5E1]" />
               <p className="mt-3 text-[13px] text-[#64748B]">
                 {stats.count === 0
                   ? `No payments recorded in ${monthLabel}`
@@ -330,10 +330,10 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
                       {records.map((p) => (
                         <div
                           key={p.id}
-                          className="flex items-center justify-between rounded-2xl border border-white/[0.06] bg-[#121821] px-4 py-3"
+                          className="flex items-center justify-between rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3"
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-[14px] font-semibold text-white">
+                            <p className="truncate text-[14px] font-semibold text-[#0F172A]">
                               {members[p.admission_id] ?? "Unknown member"}
                             </p>
                             <p className="mt-0.5 text-[11px] capitalize text-[#64748B]">

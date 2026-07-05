@@ -21,7 +21,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
       className="fixed inset-x-0 bottom-0 z-50 pointer-events-none"
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 16px)" }}
     >
-      <div className="pointer-events-auto mx-4 flex max-w-md items-center justify-between gap-1 rounded-full border border-white/[0.06] bg-[#121821]/95 px-2 py-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:mx-auto">
+      <div className="pointer-events-auto mx-4 flex max-w-md items-center justify-between gap-1 rounded-full border border-[#E2E8F0] bg-[#FFFFFF]/95 px-2 py-2 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = active === tab.id;
@@ -32,7 +32,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
               aria-label={tab.label}
               className={cn(
                 "relative flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/50",
-                isActive ? "text-white" : "text-[#94A3B8] hover:text-white",
+                isActive ? "text-[#0F172A]" : "text-[#94A3B8] hover:text-[#0F172A]",
               )}
             >
               {isActive && (

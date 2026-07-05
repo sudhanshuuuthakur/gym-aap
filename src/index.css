@@ -8,27 +8,27 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Premium dark SaaS palette (Apple / Linear / Stripe / Notion) */
-    --background: 210 30% 6%;          /* #0B0F14 */
-    --foreground: 0 0% 100%;
+    /* Premium light SaaS palette (Apple / Linear / Stripe / Notion) */
+    --background: 0 0% 100%;           /* #FFFFFF */
+    --foreground: 222 47% 11%;         /* #0F172A */
 
-    --surface: 214 25% 10%;            /* #121821 */
-    --surface-2: 217 22% 13%;          /* #181F2A */
+    --surface: 0 0% 100%;              /* #FFFFFF */
+    --surface-2: 210 40% 96%;          /* #F1F5F9 */
 
-    --card: 214 25% 10%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 214 25% 10%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
     --primary: 142 71% 45%;            /* #22C55E */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 22% 13%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 217 22% 13%;
-    --muted-foreground: 215 20% 65%;   /* #94A3B8 */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;   /* #64748B */
 
     --accent: 217 91% 60%;             /* #3B82F6 */
     --accent-foreground: 0 0% 100%;
@@ -39,8 +39,8 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 100%;               /* used with /6 opacity */
-    --input: 217 22% 16%;
+    --border: 214 32% 91%;             /* #E2E8F0 */
+    --input: 214 32% 91%;
     --ring: 142 71% 45%;
 
     --radius: 1.375rem;                /* 22px cards */
@@ -95,7 +95,7 @@ All colors MUST be HSL.
 
 @layer base {
   * {
-    @apply border-white/[0.06];
+    @apply border-[#E2E8F0];
   }
 
   body {

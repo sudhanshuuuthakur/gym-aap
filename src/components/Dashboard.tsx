@@ -41,19 +41,19 @@ export function Dashboard({ session }: DashboardProps) {
   const greeting = displayName || phone;
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-[#0B0F14] text-white">
+    <div className="relative min-h-[100dvh] w-full bg-[#FFFFFF] text-[#0F172A]">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-[#0B0F14]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-[#E2E8F0] bg-[#FFFFFF]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 pt-5 pb-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22C55E]/12">
               <Dumbbell className="h-4 w-4 text-[#22C55E]" strokeWidth={2.25} />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-white">Gym Manager</span>
+            <span className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Gym Manager</span>
           </div>
           <button
             aria-label="Notifications"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
           >
             <Bell className="h-4 w-4" strokeWidth={2} />
             <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#EF4444]" />

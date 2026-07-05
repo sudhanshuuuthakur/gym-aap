@@ -71,12 +71,12 @@ export function PhoneLoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-[22px] border border-white/[0.06] bg-[#121821]/95 backdrop-blur-xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
+    <div className="w-full max-w-sm rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF]/95 backdrop-blur-xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
       <div className="text-center space-y-3">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#22C55E]/12 border border-[#22C55E]/25">
           <Dumbbell className="h-6 w-6 text-[#22C55E]" strokeWidth={2.25} />
         </div>
-        <h2 className="text-[26px] font-bold tracking-tight text-white">
+        <h2 className="text-[26px] font-bold tracking-tight text-[#0F172A]">
           {mode === "login" ? "Gym Manager" : "Create account"}
         </h2>
         <p className="text-[13px] text-[#94A3B8]">
@@ -98,7 +98,7 @@ export function PhoneLoginForm() {
             placeholder="10-digit phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-            className="bg-[#181F2A] border-white/[0.06] text-white placeholder:text-[#475569] h-11 rounded-xl focus-visible:ring-[#22C55E]/40 focus-visible:border-[#22C55E]/60"
+            className="bg-[#F1F5F9] border-[#E2E8F0] text-[#0F172A] placeholder:text-[#475569] h-11 rounded-xl focus-visible:ring-[#22C55E]/40 focus-visible:border-[#22C55E]/60"
           />
         </div>
 
@@ -113,7 +113,7 @@ export function PhoneLoginForm() {
                   <InputOTPSlot
                     key={i}
                     index={i}
-                    className="bg-[#181F2A] border-white/[0.06] text-white h-12 w-11 text-lg rounded-xl focus-visible:ring-[#22C55E]/40 focus-visible:border-[#22C55E]/60"
+                    className="bg-[#F1F5F9] border-[#E2E8F0] text-[#0F172A] h-12 w-11 text-lg rounded-xl focus-visible:ring-[#22C55E]/40 focus-visible:border-[#22C55E]/60"
                   />
                 ))}
               </InputOTPGroup>
@@ -124,7 +124,7 @@ export function PhoneLoginForm() {
         <Button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full h-11 rounded-full bg-[#22C55E] hover:bg-[#22C55E]/90 text-[#0B0F14] font-semibold shadow-[0_8px_24px_rgba(34,197,94,0.25)] transition-all active:scale-[0.98]"
+          className="w-full h-11 rounded-full bg-[#22C55E] hover:bg-[#22C55E]/90 text-[#FFFFFF] font-semibold shadow-[0_8px_24px_rgba(34,197,94,0.25)] transition-all active:scale-[0.98]"
         >
           {loading
             ? "Please wait..."

@@ -111,17 +111,17 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
         <button
           onClick={onBack}
           aria-label="Back"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#94A3B8] transition-colors hover:text-white active:scale-95"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
         <div className="min-w-0 flex-1">
-          <h1 className="text-[22px] font-bold tracking-tight text-white">Collect Payment</h1>
+          <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Collect Payment</h1>
           <p className="mt-0.5 text-[12px] text-[#94A3B8]">Record member fee payments</p>
         </div>
         <button
           onClick={() => setShowHistory(true)}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#121821] text-[#F59E0B] transition-colors hover:text-white active:scale-95"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#F59E0B] transition-colors hover:text-[#0F172A] active:scale-95"
           aria-label="Payment history"
         >
           <History className="h-4 w-4" />
@@ -133,7 +133,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[12px] font-medium text-[#94A3B8]">Total Collected</p>
-            <p className="mt-1 flex items-center text-[24px] font-bold text-white">
+            <p className="mt-1 flex items-center text-[24px] font-bold text-[#0F172A]">
               <IndianRupee className="h-5 w-5" />
               {totalCollected.toLocaleString("en-IN")}
             </p>
@@ -152,7 +152,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
           placeholder="Search member..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-11 rounded-2xl border-white/[0.06] bg-[#121821] pl-9 text-[14px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
+          className="h-11 rounded-2xl border-[#E2E8F0] bg-[#FFFFFF] pl-9 text-[14px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
         />
       </div>
 
@@ -163,7 +163,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <Wallet className="mx-auto h-10 w-10 text-[#1F2937]" />
+          <Wallet className="mx-auto h-10 w-10 text-[#CBD5E1]" />
           <p className="mt-3 text-[13px] text-[#64748B]">No members found</p>
         </div>
       ) : (
@@ -176,11 +176,11 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(idx * 0.02, 0.2), duration: 0.25 }}
-                className="rounded-2xl border border-white/[0.06] bg-[#121821] p-4"
+                className="rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-semibold text-white">{m.name}</p>
+                    <p className="truncate text-[14px] font-semibold text-[#0F172A]">{m.name}</p>
                     {m.phone && <p className="mt-0.5 text-[12px] text-[#94A3B8]">{m.phone}</p>}
                     {last && (
                       <div className="mt-1 space-y-1">
@@ -221,13 +221,13 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                         if (!amounts[m.id]) setAmounts((a) => ({ ...a, [m.id]: defaultFee.toString() }));
                       }}
                       onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
-                      className="h-10 rounded-xl border-white/[0.06] bg-[#0B0F14] pl-7 text-[13px] text-white placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
+                      className="h-10 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] pl-7 text-[13px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
                     />
                   </div>
                   <button
                     onClick={() => handleCollect(m)}
                     disabled={savingId === m.id}
-                    className="flex h-10 items-center gap-1.5 rounded-xl bg-[#22C55E] px-4 text-[12px] font-semibold text-[#0B0F14] transition-all hover:bg-[#22C55E]/90 active:scale-95 disabled:opacity-60"
+                    className="flex h-10 items-center gap-1.5 rounded-xl bg-[#22C55E] px-4 text-[12px] font-semibold text-[#FFFFFF] transition-all hover:bg-[#22C55E]/90 active:scale-95 disabled:opacity-60"
                   >
                     {savingId === m.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />

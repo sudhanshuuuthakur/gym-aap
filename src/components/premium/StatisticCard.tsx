@@ -10,7 +10,7 @@ interface StatisticCardProps {
 }
 
 const toneMap = {
-  neutral: { iconBg: "bg-white/[0.06] text-white", value: "text-white" },
+  neutral: { iconBg: "bg-[#F1F5F9] text-[#0F172A]", value: "text-[#0F172A]" },
   primary: { iconBg: "bg-[#22C55E]/12 text-[#22C55E]", value: "text-[#22C55E]" },
   warning: { iconBg: "bg-[#F59E0B]/12 text-[#F59E0B]", value: "text-[#F59E0B]" },
 };

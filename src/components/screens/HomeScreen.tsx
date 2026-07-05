@@ -34,7 +34,7 @@ export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onColl
         <p className="text-[13px] font-medium text-[#94A3B8]">
           {salutation} <span aria-hidden>👋</span>
         </p>
-        <h1 className="mt-1 truncate text-[24px] font-bold leading-tight tracking-tight text-white">
+        <h1 className="mt-1 truncate text-[24px] font-bold leading-tight tracking-tight text-[#0F172A]">
           {greeting}
         </h1>
         <p className="mt-1.5 text-[13px] text-[#64748B]">
@@ -75,7 +75,7 @@ export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onColl
               <CalendarClock className="h-5 w-5" strokeWidth={2} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-semibold text-white">0 memberships expiring</p>
+              <p className="text-[14px] font-semibold text-[#0F172A]">0 memberships expiring</p>
               <p className="mt-0.5 truncate text-[12px] text-[#94A3B8]">No memberships expire this week.</p>
             </div>
             <ChevronRight className="h-4 w-4 shrink-0 text-[#64748B]" />

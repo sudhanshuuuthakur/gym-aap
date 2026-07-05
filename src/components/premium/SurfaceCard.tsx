@@ -6,7 +6,7 @@ export const SurfaceCard = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElem
     <div
       ref={ref}
       className={cn(
-        "rounded-[22px] border border-white/[0.06] bg-[#121821] p-6",
+        "rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF] p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)]",
         className,
       )}
       {...props}
