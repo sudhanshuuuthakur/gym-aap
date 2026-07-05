@@ -39,7 +39,7 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
       transition={{ duration: 0.3, delay: 0.05 * index, ease: [0.22, 1, 0.36, 1] }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "group relative flex h-full min-h-[148px] w-full flex-col items-start justify-between overflow-hidden rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF] p-5 text-left shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)] transition-all hover:shadow-[0_2px_4px_rgba(15,23,42,0.05),0_16px_32px_-12px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/50",
+        "group relative flex h-full min-h-[148px] w-full flex-col items-start justify-between overflow-hidden rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF] p-4 text-left shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)] transition-all hover:shadow-[0_2px_4px_rgba(15,23,42,0.05),0_16px_32px_-12px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/50",
       )}
       aria-label={title}
     >
