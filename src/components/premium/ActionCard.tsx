@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface ActionCardProps {
   icon: LucideIcon;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   onClick?: () => void;
   tone?: "primary" | "accent" | "warning";
   index?: number;
