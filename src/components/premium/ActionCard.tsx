@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface ActionCardProps {
   icon: LucideIcon;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   onClick?: () => void;
   tone?: "primary" | "accent" | "warning";
   index?: number;
@@ -51,7 +51,7 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
         <div className="flex items-end justify-between gap-1.5">
           <div className="min-w-0 flex-1">
             <p className="text-[12px] font-semibold leading-tight text-[#0F172A] whitespace-nowrap">{title}</p>
-            <p className="mt-0.5 text-[11px] leading-tight text-[#94A3B8] break-words">{subtitle}</p>
+            {subtitle && <p className="mt-0.5 text-[11px] leading-tight text-[#94A3B8] break-words">{subtitle}</p>}
           </div>
           <ArrowUpRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5", t.arrow)} />
         </div>

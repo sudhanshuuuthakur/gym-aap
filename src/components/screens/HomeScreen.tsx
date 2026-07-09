@@ -50,7 +50,7 @@ export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onColl
           </h2>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          <ActionCard icon={UserPlus} title="Register" subtitle="new member" onClick={onAddMember} tone="primary" index={0} />
+          <ActionCard icon={UserPlus} title="Add member" onClick={onAddMember} tone="primary" index={0} />
           <ActionCard icon={ClipboardCheck} title="Attendance" subtitle="Check-ins" onClick={onAttendance} tone="accent" index={1} />
           <ActionCard icon={Wallet} title="Collect" subtitle="Payments" onClick={onCollectPayment} tone="warning" index={2} />
         </div>
