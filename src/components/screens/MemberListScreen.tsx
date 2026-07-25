@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Search, Users, CheckCircle2, Clock, MessageCircle, MessageSquare } from "lucide-react";
+import { ArrowLeft, Search, Users, CheckCircle2, Clock, MessageCircle, MessageSquare, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { motion } from "framer-motion";
+import { AIReminderDialog } from "@/components/AIReminderDialog";
 
 export type MemberFilter = "all" | "paid" | "notpaid";
 
@@ -44,6 +45,14 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [aiTarget, setAiTarget] = useState<null | {
+    name: string;
+    phone: string | null;
+    expiryDate: string;
+    amount: number;
+    gymName: string;
+    ownerContact: string;
+  }>(null);
 
   useEffect(() => {
     Promise.all([
@@ -267,6 +276,22 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={() =>
+                        setAiTarget({
+                          name: member.name,
+                          phone: member.phone,
+                          expiryDate,
+                          amount,
+                          gymName,
+                          ownerContact: contactNumber,
+                        })
+                      }
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-[#0F172A]/15 bg-[#0F172A] px-3 py-2 text-[12px] font-semibold text-white transition-all hover:bg-[#0F172A]/90 active:scale-95"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      AI
+                    </button>
+                    <button
+                      onClick={() =>
                         notifyWhatsApp({
                           name: member.name,
                           phone: member.phone,
@@ -305,6 +330,18 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
             );
           })}
         </div>
+      )}
+      {aiTarget && (
+        <AIReminderDialog
+          open={!!aiTarget}
+          onOpenChange={(o) => !o && setAiTarget(null)}
+          memberName={aiTarget.name}
+          memberPhone={aiTarget.phone}
+          gymName={aiTarget.gymName}
+          ownerContact={aiTarget.ownerContact}
+          expiryDate={aiTarget.expiryDate}
+          amount={aiTarget.amount}
+        />
       )}
     </div>
   );
