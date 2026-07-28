@@ -23,7 +23,10 @@ interface Payment {
   admission_id: string;
   amount: number;
   payment_date: string;
+  validity_days?: number;
 }
+
+const VALIDITY_OPTIONS: readonly number[] = [30, 60, 90];
 
 interface Props {
   userId: string;
@@ -37,6 +40,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [search, setSearch] = useState("");
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [paymentDates, setPaymentDates] = useState<Record<string, Date | undefined>>({});
+  const [validities, setValidities] = useState<Record<string, number>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [showHistory, setShowHistory] = useState(false);
@@ -45,7 +49,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     setLoading(true);
     const [m, p] = await Promise.all([
       supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
-      (supabase as any).from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
+      (supabase as any).from("payments").select("admission_id, amount, payment_date, validity_days").eq("user_id", userId).order("payment_date", { ascending: false }),
     ]);
     if (m.data) setMembers(m.data);
     if (p.data) setPayments(p.data as Payment[]);
@@ -61,18 +65,20 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
 
   const isPaymentValid = (payment: Payment | undefined) => {
     if (!payment) return false;
+    const validity = payment.validity_days ?? 30;
     const paymentDate = new Date(payment.payment_date);
     const today = new Date();
     const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
-    return daysDiff <= 30;
+    return daysDiff <= validity;
   };
 
   const getDaysRemaining = (payment: Payment | undefined) => {
     if (!payment) return 0;
+    const validity = payment.validity_days ?? 30;
     const paymentDate = new Date(payment.payment_date);
     const today = new Date();
     const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(0, 30 - daysDiff);
+    return Math.max(0, validity - daysDiff);
   };
 
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
@@ -85,6 +91,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       return;
     }
     const selectedDate = paymentDates[member.id];
+    const validityDays = validities[member.id] ?? 30;
     const isoDate = selectedDate
       ? format(selectedDate, "yyyy-MM-dd")
       : new Date().toISOString().slice(0, 10);
@@ -95,6 +102,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       amount,
       payment_date: isoDate,
       method: "cash",
+      validity_days: validityDays,
     });
     if (error) {
       toast.error(error.message);
@@ -105,9 +113,10 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       await supabase.from("admissions").update({ status: "approved" }).eq("id", member.id);
     }
     const dateLabel = selectedDate ? ` on ${format(selectedDate, "d/M/yyyy")}` : "";
-    toast.success(`₹${amount} collected from ${member.name}${dateLabel}`);
+    toast.success(`₹${amount} collected from ${member.name}${dateLabel} · ${validityDays}d validity`);
     setAmounts((a) => ({ ...a, [member.id]: "" }));
     setPaymentDates((d) => ({ ...d, [member.id]: undefined }));
+    setValidities((v) => ({ ...v, [member.id]: 30 }));
     setSavingId(null);
     loadData();
   };
@@ -222,100 +231,132 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     )}
                   </div>
                 </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
-                    <Input
-                      inputMode="numeric"
-                      placeholder={`Amount (Default: ₹${defaultFee})`}
-                      value={amounts[m.id] || ""}
-                      onFocus={() => {
-                        if (!amounts[m.id]) setAmounts((a) => ({ ...a, [m.id]: defaultFee.toString() }));
-                      }}
-                      onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
-                      className="h-10 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] pl-7 text-[13px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
-                    />
-                  </div>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        className={cn(
-                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] active:scale-95",
-                          paymentDates[m.id] && "border-[#22C55E]/50 bg-[#22C55E]/5 text-[#22C55E]"
-                        )}
-                        title={paymentDates[m.id] ? `Date: ${format(paymentDates[m.id]!, "PPP")}` : "Select payment date"}
-                        aria-label="Select payment date"
-                      >
-                        <CalendarIcon className="h-4 w-4" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto rounded-2xl border border-[#E2E8F0] bg-white p-0 text-[#0F172A] shadow-xl z-[99999] !overflow-visible"
-                      sideOffset={6}
-                    >
-                      <Calendar
-                        mode="single"
-                        selected={paymentDates[m.id]}
-                        onSelect={(date) =>
-                          setPaymentDates((d) => ({ ...d, [m.id]: date }))
-                        }
-                        initialFocus
-                        disabled={(date) => date > new Date()}
-                        className="p-3"
-                        classNames={{
-                          months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                          month: "space-y-4",
-                          caption: "flex justify-center pt-1 relative items-center",
-                          caption_label: "text-sm font-semibold text-[#0F172A]",
-                          nav: "space-x-1 flex items-center",
-                          nav_button: cn(
-                            "h-8 w-8 rounded-md border border-[#E2E8F0] bg-white p-0 text-[#334155] hover:bg-[#F1F5F9] inline-flex items-center justify-center"
-                          ),
-                          nav_button_previous: "absolute left-1",
-                          nav_button_next: "absolute right-1",
-                          table: "w-full border-collapse space-y-1",
-                          head_row: "flex",
-                          head_cell: "text-[#94A3B8] rounded-md w-9 font-medium text-[0.75rem] m-0.5",
-                          row: "flex w-full mt-1",
-                          cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-[#22C55E]/10 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-md",
-                          day: "h-9 w-9 p-0 font-normal text-[#334155] hover:bg-[#F1F5F9] rounded-md inline-flex items-center justify-center aria-selected:opacity-100 transition-colors",
-                          day_selected: "bg-[#22C55E] text-white hover:bg-[#16A34A] hover:text-white focus:bg-[#22C55E] rounded-md",
-                          day_today: "bg-[#F1F5F9] text-[#0F172A] font-semibold",
-                          day_outside: "text-[#CBD5E1] opacity-40",
-                          day_disabled: "text-[#CBD5E1] opacity-40 hover:bg-transparent",
-                          day_hidden: "invisible",
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
+                      <Input
+                        inputMode="numeric"
+                        placeholder={`Amount (Default: ₹${defaultFee})`}
+                        value={amounts[m.id] || ""}
+                        onFocus={() => {
+                          if (!amounts[m.id]) setAmounts((a) => ({ ...a, [m.id]: defaultFee.toString() }));
                         }}
+                        onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
+                        className="h-10 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] pl-7 text-[13px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
                       />
-                      {paymentDates[m.id] && (
-                        <div className="border-t border-[#E2E8F0] p-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              setPaymentDates((d) => ({ ...d, [m.id]: undefined }))
-                            }
-                            className="w-full h-8 text-[11px] text-[#94A3B8] hover:text-[#EF4444]"
-                          >
-                            Clear date (use today)
-                          </Button>
-                        </div>
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={cn(
+                            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] active:scale-95",
+                            paymentDates[m.id] && "border-[#22C55E]/50 bg-[#22C55E]/5 text-[#22C55E]"
+                          )}
+                          title={paymentDates[m.id] ? `Date: ${format(paymentDates[m.id]!, "PPP")}` : "Select payment date"}
+                          aria-label="Select payment date"
+                        >
+                          <CalendarIcon className="h-4 w-4" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="w-auto rounded-2xl border border-[#E2E8F0] bg-white p-0 text-[#0F172A] shadow-xl z-[99999] !overflow-visible"
+                        sideOffset={6}
+                      >
+                        <Calendar
+                          mode="single"
+                          selected={paymentDates[m.id]}
+                          onSelect={(date) =>
+                            setPaymentDates((d) => ({ ...d, [m.id]: date }))
+                          }
+                          initialFocus
+                          disabled={(date) => date > new Date()}
+                          className="p-3"
+                          classNames={{
+                            months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                            month: "space-y-4",
+                            caption: "flex justify-center pt-1 relative items-center",
+                            caption_label: "text-sm font-semibold text-[#0F172A]",
+                            nav: "space-x-1 flex items-center",
+                            nav_button: cn(
+                              "h-8 w-8 rounded-md border border-[#E2E8F0] bg-white p-0 text-[#334155] hover:bg-[#F1F5F9] inline-flex items-center justify-center"
+                            ),
+                            nav_button_previous: "absolute left-1",
+                            nav_button_next: "absolute right-1",
+                            table: "w-full border-collapse space-y-1",
+                            head_row: "flex",
+                            head_cell: "text-[#94A3B8] rounded-md w-9 font-medium text-[0.75rem] m-0.5",
+                            row: "flex w-full mt-1",
+                            cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-[#22C55E]/10 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-md",
+                            day: "h-9 w-9 p-0 font-normal text-[#334155] hover:bg-[#F1F5F9] rounded-md inline-flex items-center justify-center aria-selected:opacity-100 transition-colors",
+                            day_selected: "bg-[#22C55E] text-white hover:bg-[#16A34A] hover:text-white focus:bg-[#22C55E] rounded-md",
+                            day_today: "bg-[#F1F5F9] text-[#0F172A] font-semibold",
+                            day_outside: "text-[#CBD5E1] opacity-40",
+                            day_disabled: "text-[#CBD5E1] opacity-40 hover:bg-transparent",
+                            day_hidden: "invisible",
+                          }}
+                        />
+                        {paymentDates[m.id] && (
+                          <div className="border-t border-[#E2E8F0] p-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                setPaymentDates((d) => ({ ...d, [m.id]: undefined }))
+                              }
+                              className="w-full h-8 text-[11px] text-[#94A3B8] hover:text-[#EF4444]"
+                            >
+                              Clear date (use today)
+                            </Button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                    <button
+                      onClick={() => handleCollect(m)}
+                      disabled={savingId === m.id}
+                      className="flex h-10 items-center gap-1.5 rounded-xl bg-[#22C55E] px-4 text-[12px] font-semibold text-[#FFFFFF] transition-all hover:bg-[#22C55E]/90 active:scale-95 disabled:opacity-60"
+                    >
+                      {savingId === m.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Wallet className="h-3.5 w-3.5" />
                       )}
-                    </PopoverContent>
-                  </Popover>
-                  <button
-                    onClick={() => handleCollect(m)}
-                    disabled={savingId === m.id}
-                    className="flex h-10 items-center gap-1.5 rounded-xl bg-[#22C55E] px-4 text-[12px] font-semibold text-[#FFFFFF] transition-all hover:bg-[#22C55E]/90 active:scale-95 disabled:opacity-60"
+                      Collect
+                    </button>
+                  </div>
+                  <div
+                    className="inline-flex items-center gap-0.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-0.5"
+                    role="group"
+                    aria-label="Select membership validity duration"
                   >
-                    {savingId === m.id ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Wallet className="h-3.5 w-3.5" />
-                    )}
-                    Collect
-                  </button>
+                    {VALIDITY_OPTIONS.map((days) => {
+                      const isSelected = (validities[m.id] ?? 30) === days;
+                      return (
+                        <button
+                          key={days}
+                          type="button"
+                          onClick={() =>
+                            setValidities((v) => ({ ...v, [m.id]: days }))
+                          }
+                          className={cn(
+                            "h-7 min-w-[48px] rounded-lg px-2 text-[11px] font-semibold transition-all",
+                            isSelected
+                              ? "bg-[#22C55E] text-white shadow-sm"
+                              : "bg-transparent text-[#64748B] hover:text-[#0F172A] hover:bg-white"
+                          )}
+                        >
+                          {days}d
+                        </button>
+                      );
+                    })}
+                    <div className="mx-1 h-4 w-px bg-[#E2E8F0]" />
+                    <span className="px-1.5 text-[10px] font-medium uppercase tracking-wide text-[#94A3B8]">
+                      Validity
+                    </span>
+                  </div>
                 </div>
               </motion.div>
             );

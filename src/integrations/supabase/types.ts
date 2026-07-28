@@ -105,6 +105,7 @@ export type Database = {
           payment_date: string
           updated_at: string
           user_id: string
+          validity_days: number
         }
         Insert: {
           admission_id: string
@@ -116,6 +117,7 @@ export type Database = {
           payment_date?: string
           updated_at?: string
           user_id: string
+          validity_days?: number
         }
         Update: {
           admission_id?: string
@@ -127,6 +129,7 @@ export type Database = {
           payment_date?: string
           updated_at?: string
           user_id?: string
+          validity_days?: number
         }
         Relationships: [
           {
