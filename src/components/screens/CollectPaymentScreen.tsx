@@ -238,20 +238,22 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                   </div>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
+                      <button
                         type="button"
-                        variant="outline"
-                        size="icon"
                         className={cn(
-                          "h-10 w-10 shrink-0 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]",
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] active:scale-95",
                           paymentDates[m.id] && "border-[#22C55E]/50 bg-[#22C55E]/5 text-[#22C55E]"
                         )}
                         title={paymentDates[m.id] ? `Date: ${format(paymentDates[m.id]!, "PPP")}` : "Select payment date"}
+                        aria-label="Select payment date"
                       >
                         <CalendarIcon className="h-4 w-4" />
-                      </Button>
+                      </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto rounded-2xl border-[#E2E8F0] p-0 z-[9999]" align="end">
+                    <PopoverContent
+                      className="w-auto rounded-2xl border border-[#E2E8F0] bg-white p-0 text-[#0F172A] shadow-xl z-[99999] !overflow-visible"
+                      sideOffset={6}
+                    >
                       <Calendar
                         mode="single"
                         selected={paymentDates[m.id]}
@@ -260,18 +262,29 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                         }
                         initialFocus
                         disabled={(date) => date > new Date()}
-                        className="p-3 pointer-events-auto"
+                        className="p-3"
                         classNames={{
-                          caption_label: "text-sm font-medium text-[#0F172A]",
+                          months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                          month: "space-y-4",
+                          caption: "flex justify-center pt-1 relative items-center",
+                          caption_label: "text-sm font-semibold text-[#0F172A]",
+                          nav: "space-x-1 flex items-center",
                           nav_button: cn(
-                            "h-7 w-7 rounded-md border border-[#E2E8F0] p-0 opacity-70 hover:opacity-100 hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#0F172A]"
+                            "h-8 w-8 rounded-md border border-[#E2E8F0] bg-white p-0 text-[#334155] hover:bg-[#F1F5F9] inline-flex items-center justify-center"
                           ),
-                          head_cell: "text-[#94A3B8] rounded-md w-9 font-normal text-[0.8rem]",
-                          day: "h-9 w-9 p-0 font-normal text-[#334155] hover:bg-[#F1F5F9] rounded-md inline-flex items-center justify-center",
-                          day_selected: "bg-[#22C55E] text-[#FFFFFF] hover:bg-[#22C55E]/90 focus:bg-[#22C55E]",
-                          day_today: "bg-[#F1F5F9] text-[#0F172A]",
-                          day_outside: "text-[#CBD5E1] opacity-50",
-                          day_disabled: "text-[#CBD5E1] opacity-50",
+                          nav_button_previous: "absolute left-1",
+                          nav_button_next: "absolute right-1",
+                          table: "w-full border-collapse space-y-1",
+                          head_row: "flex",
+                          head_cell: "text-[#94A3B8] rounded-md w-9 font-medium text-[0.75rem] m-0.5",
+                          row: "flex w-full mt-1",
+                          cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-[#22C55E]/10 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-md",
+                          day: "h-9 w-9 p-0 font-normal text-[#334155] hover:bg-[#F1F5F9] rounded-md inline-flex items-center justify-center aria-selected:opacity-100 transition-colors",
+                          day_selected: "bg-[#22C55E] text-white hover:bg-[#16A34A] hover:text-white focus:bg-[#22C55E] rounded-md",
+                          day_today: "bg-[#F1F5F9] text-[#0F172A] font-semibold",
+                          day_outside: "text-[#CBD5E1] opacity-40",
+                          day_disabled: "text-[#CBD5E1] opacity-40 hover:bg-transparent",
+                          day_hidden: "invisible",
                         }}
                       />
                       {paymentDates[m.id] && (
