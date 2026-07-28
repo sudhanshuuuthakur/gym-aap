@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
+import { ContactPickerButton } from "@/components/ContactPickerButton";
+import { cn } from "@/lib/utils";
 
 interface Member {
   id: string;
@@ -48,6 +50,11 @@ export function EditMemberDialog({ open, onOpenChange, member, onUpdated }: Edit
       setWeight(member.weight != null ? String(member.weight) : "");
     }
   }, [member]);
+
+  const handlePickContact = ({ name: contactName, phone: contactPhone }: { name: string; phone: string }) => {
+    if (contactName) setName(contactName);
+    if (contactPhone) setPhone(contactPhone);
+  };
 
   const handleSave = async () => {
     if (!member) return;
@@ -96,12 +103,22 @@ export function EditMemberDialog({ open, onOpenChange, member, onUpdated }: Edit
           </div>
           <div className="space-y-2">
             <Label className="text-neutral-400">Phone *</Label>
-            <Input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-              className={inputClass}
-            />
+            <div
+              className={cn(
+                "flex h-10 w-full items-center rounded-md border bg-neutral-800 pl-3 pr-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-neutral-900",
+                "border-neutral-700"
+              )}
+            >
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                placeholder="10 digit number"
+                maxLength={10}
+                className="w-full bg-transparent text-base placeholder:text-neutral-500 text-neutral-100 focus:outline-none md:text-sm"
+              />
+              <ContactPickerButton variant="suffix" onSelect={handlePickContact} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label className="text-neutral-400">Email</Label>

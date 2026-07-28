@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { UserPlus, CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ContactPickerButton } from "@/components/ContactPickerButton";
 
 interface AddAdmissionDialogProps {
   open: boolean;
@@ -36,6 +37,11 @@ export function AddAdmissionDialog({
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const handlePickContact = ({ name: contactName, phone: contactPhone }: { name: string; phone: string }) => {
+    if (contactName) setName(contactName);
+    if (contactPhone) setPhone(contactPhone);
+  };
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -101,17 +107,25 @@ export function AddAdmissionDialog({
           </div>
           <div className="space-y-2">
             <Label className="text-neutral-400">Phone *</Label>
-            <Input
-              type="tel"
-              value={phone}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                setPhone(val);
-              }}
-              placeholder="10 digit number"
-              maxLength={10}
-              className={inputClass}
-            />
+            <div
+              className={cn(
+                "flex h-10 w-full items-center rounded-md border bg-neutral-800 pl-3 pr-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-neutral-900",
+                "border-neutral-700"
+              )}
+            >
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setPhone(val);
+                }}
+                placeholder="10 digit number"
+                maxLength={10}
+                className="w-full bg-transparent text-base placeholder:text-neutral-500 text-neutral-100 focus:outline-none md:text-sm"
+              />
+              <ContactPickerButton variant="suffix" onSelect={handlePickContact} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label className="text-neutral-400">Date of Joining</Label>
