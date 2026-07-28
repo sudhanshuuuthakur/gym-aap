@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2 } from "lucide-react";
+import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { PaymentHistoryScreen } from "@/components/screens/PaymentHistoryScreen";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
@@ -31,6 +36,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [amounts, setAmounts] = useState<Record<string, string>>({});
+  const [paymentDates, setPaymentDates] = useState<Record<string, Date | undefined>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [showHistory, setShowHistory] = useState(false);
@@ -78,12 +84,16 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       toast.error("Enter a valid amount");
       return;
     }
+    const selectedDate = paymentDates[member.id];
+    const isoDate = selectedDate
+      ? format(selectedDate, "yyyy-MM-dd")
+      : new Date().toISOString().slice(0, 10);
     setSavingId(member.id);
     const { error } = await (supabase as any).from("payments").insert({
       user_id: userId,
       admission_id: member.id,
       amount,
-      payment_date: new Date().toISOString().slice(0, 10),
+      payment_date: isoDate,
       method: "cash",
     });
     if (error) {
@@ -94,8 +104,10 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     if (member.status !== "approved") {
       await supabase.from("admissions").update({ status: "approved" }).eq("id", member.id);
     }
-    toast.success(`₹${amount} collected from ${member.name}`);
+    const dateLabel = selectedDate ? ` on ${format(selectedDate, "d/M/yyyy")}` : "";
+    toast.success(`₹${amount} collected from ${member.name}${dateLabel}`);
     setAmounts((a) => ({ ...a, [member.id]: "" }));
+    setPaymentDates((d) => ({ ...d, [member.id]: undefined }));
     setSavingId(null);
     loadData();
   };
@@ -224,6 +236,61 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                       className="h-10 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] pl-7 text-[13px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#22C55E]/40"
                     />
                   </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={cn(
+                          "h-10 w-10 shrink-0 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#0F172A]",
+                          paymentDates[m.id] && "border-[#22C55E]/50 bg-[#22C55E]/5 text-[#22C55E]"
+                        )}
+                        title={paymentDates[m.id] ? `Date: ${format(paymentDates[m.id]!, "PPP")}` : "Select payment date"}
+                      >
+                        <CalendarIcon className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto rounded-2xl border-[#E2E8F0] p-0 z-[9999]" align="end">
+                      <Calendar
+                        mode="single"
+                        selected={paymentDates[m.id]}
+                        onSelect={(date) =>
+                          setPaymentDates((d) => ({ ...d, [m.id]: date }))
+                        }
+                        initialFocus
+                        disabled={(date) => date > new Date()}
+                        className="p-3 pointer-events-auto"
+                        classNames={{
+                          caption_label: "text-sm font-medium text-[#0F172A]",
+                          nav_button: cn(
+                            "h-7 w-7 rounded-md border border-[#E2E8F0] p-0 opacity-70 hover:opacity-100 hover:bg-[#F1F5F9] inline-flex items-center justify-center text-[#0F172A]"
+                          ),
+                          head_cell: "text-[#94A3B8] rounded-md w-9 font-normal text-[0.8rem]",
+                          day: "h-9 w-9 p-0 font-normal text-[#334155] hover:bg-[#F1F5F9] rounded-md inline-flex items-center justify-center",
+                          day_selected: "bg-[#22C55E] text-[#FFFFFF] hover:bg-[#22C55E]/90 focus:bg-[#22C55E]",
+                          day_today: "bg-[#F1F5F9] text-[#0F172A]",
+                          day_outside: "text-[#CBD5E1] opacity-50",
+                          day_disabled: "text-[#CBD5E1] opacity-50",
+                        }}
+                      />
+                      {paymentDates[m.id] && (
+                        <div className="border-t border-[#E2E8F0] p-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              setPaymentDates((d) => ({ ...d, [m.id]: undefined }))
+                            }
+                            className="w-full h-8 text-[11px] text-[#94A3B8] hover:text-[#EF4444]"
+                          >
+                            Clear date (use today)
+                          </Button>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
                   <button
                     onClick={() => handleCollect(m)}
                     disabled={savingId === m.id}
