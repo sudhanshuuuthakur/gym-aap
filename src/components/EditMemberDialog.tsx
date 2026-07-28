@@ -119,6 +119,10 @@ export function EditMemberDialog({ open, onOpenChange, member, onUpdated }: Edit
               />
               <ContactPickerButton variant="suffix" onSelect={handlePickContact} />
             </div>
+            <p className="text-[11px] leading-tight text-neutral-500 flex items-center gap-1">
+              <span>💡</span>
+              <span>Tap the icon above to pick name &amp; number directly from phone contacts</span>
+            </p>
           </div>
           <div className="space-y-2">
             <Label className="text-neutral-400">Email</Label>
