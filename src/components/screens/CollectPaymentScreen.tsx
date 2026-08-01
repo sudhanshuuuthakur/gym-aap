@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2, Calendar as CalendarIcon, Receipt, Pencil } from "lucide-react";
+import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2, Calendar as CalendarIcon, Receipt, Pencil, Trash2, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -45,6 +46,9 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [editAmount, setEditAmount] = useState("");
   const [editDate, setEditDate] = useState<Date | undefined>(undefined);
   const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedPaymentIds, setSelectedPaymentIds] = useState<Record<string, boolean>>({});
+  const [deletingPayments, setDeletingPayments] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [showHistory, setShowHistory] = useState(false);
@@ -95,6 +99,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
 
   const startEditPayment = (payment: Payment) => {
+    setSelectMode(false);
+    setSelectedPaymentIds({});
     setEditingPaymentId(payment.id);
     setEditAmount(String(payment.amount ?? ""));
     setEditDate(new Date(`${payment.payment_date}T00:00:00`));
@@ -104,6 +110,41 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     setEditingPaymentId(null);
     setEditAmount("");
     setEditDate(undefined);
+  };
+
+  const toggleSelectMode = () => {
+    if (!selectMode) cancelEditPayment();
+    setSelectMode((s) => !s);
+    setSelectedPaymentIds({});
+  };
+
+  const togglePaymentSelected = (paymentId: string) => {
+    setSelectedPaymentIds((s) => {
+      const next = { ...s, [paymentId]: !s[paymentId] };
+      if (!next[paymentId]) delete next[paymentId];
+      return next;
+    });
+  };
+
+  const deleteSelectedPayments = async (paymentIds: string[]) => {
+    if (paymentIds.length === 0) return;
+    setDeletingPayments(true);
+    const { error } = await supabase
+      .from("payments")
+      .delete()
+      .in("id", paymentIds)
+      .eq("user_id", userId);
+    if (error) {
+      toast.error(error.message);
+      setDeletingPayments(false);
+      return;
+    }
+    toast.success("Payments deleted");
+    setDeletingPayments(false);
+    setSelectedPaymentIds({});
+    setSelectMode(false);
+    cancelEditPayment();
+    loadData();
   };
 
   const saveEditPayment = async (payment: Payment) => {
@@ -177,6 +218,12 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   if (showHistory) {
     return <PaymentHistoryScreen userId={userId} onBack={() => setShowHistory(false)} />;
   }
+
+  const memberPayments = memberHistory
+    ? payments.filter((p) => p.admission_id === memberHistory.id)
+    : [];
+  const selectedIds = Object.keys(selectedPaymentIds);
+  const selectedCount = selectedIds.length;
 
   return (
     <div className="space-y-6">
@@ -458,6 +505,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
           if (!o) {
             setMemberHistory(null);
             cancelEditPayment();
+            setSelectMode(false);
+            setSelectedPaymentIds({});
           }
         }}
       >
@@ -470,47 +519,132 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
               {memberHistory?.phone || "No phone number"}
             </p>
           </DialogHeader>
-          <div className="mt-3 max-h-[60vh] space-y-2 overflow-auto pr-1">
-            {memberHistory &&
-            payments.filter((p) => p.admission_id === memberHistory.id).length === 0 ? (
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p className="text-[11px] font-medium text-[#94A3B8]">
+              {memberPayments.length} payment{memberPayments.length === 1 ? "" : "s"}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={toggleSelectMode}
+                className="h-9 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
+                disabled={deletingPayments || updatingPaymentId !== null}
+              >
+                {selectMode ? "Done" : "Select"}
+              </Button>
+              {selectMode && selectedCount > 0 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      type="button"
+                      className="h-9 rounded-xl bg-[#EF4444] text-white hover:bg-[#EF4444]/90"
+                      disabled={deletingPayments}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete ({selectedCount})
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="w-[calc(100%-24px)] max-w-md rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-5 text-[#0F172A] shadow-xl">
+                    <AlertDialogHeader className="text-left space-y-1.5">
+                      <AlertDialogTitle className="text-[16px] font-bold tracking-tight text-[#0F172A]">
+                        Delete selected payments?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription className="text-[12px] text-[#64748B]">
+                        This will permanently delete {selectedCount} payment{selectedCount === 1 ? "" : "s"}.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="mt-2">
+                      <AlertDialogCancel className="rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F1F5F9] hover:text-[#0F172A]">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="rounded-xl bg-[#EF4444] text-white hover:bg-[#EF4444]/90"
+                        disabled={deletingPayments}
+                        onClick={() => deleteSelectedPayments(selectedIds)}
+                      >
+                        {deletingPayments ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Delete"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          </div>
+          <div className="mt-2 max-h-[60vh] space-y-2 overflow-auto pr-1">
+            {memberHistory && memberPayments.length === 0 ? (
               <div className="py-10 text-center text-[13px] text-[#64748B]">
                 No payments recorded for this member
               </div>
             ) : (
               memberHistory &&
-              payments
-                .filter((p) => p.admission_id === memberHistory.id)
-                .map((p) => {
+              memberPayments.map((p) => {
                   const isEditing = editingPaymentId === p.id;
+                  const isSelected = !!selectedPaymentIds[p.id];
                   return (
                     <div
                       key={p.id}
-                      className="rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3"
+                      className={cn(
+                        "rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3",
+                        selectMode && isSelected && "border-[#22C55E]/50 bg-[#22C55E]/5",
+                      )}
                     >
                       {!isEditing ? (
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-[13px] font-semibold text-[#0F172A]">
-                              {new Date(`${p.payment_date}T00:00:00`).toLocaleDateString("en-IN")}
-                            </p>
-                            <p className="mt-0.5 text-[11px] capitalize text-[#64748B]">
-                              {p.method || "cash"}
-                            </p>
+                        <div
+                          className={cn(
+                            "flex items-center justify-between gap-3",
+                            selectMode && "cursor-pointer",
+                          )}
+                          onClick={() => {
+                            if (selectMode) togglePaymentSelected(p.id);
+                          }}
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            {selectMode && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  togglePaymentSelected(p.id);
+                                }}
+                                className={cn(
+                                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-white text-[#64748B] transition-colors active:scale-95",
+                                  isSelected && "border-[#22C55E]/40 bg-[#22C55E] text-white",
+                                )}
+                                aria-label={isSelected ? "Unselect payment" : "Select payment"}
+                              >
+                                {isSelected ? <Check className="h-4 w-4" /> : null}
+                              </button>
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-semibold text-[#0F172A]">
+                                {new Date(`${p.payment_date}T00:00:00`).toLocaleDateString("en-IN")}
+                              </p>
+                              <p className="mt-0.5 text-[11px] capitalize text-[#64748B]">
+                                {p.method || "cash"}
+                              </p>
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <p className="flex items-center text-[13px] font-semibold text-[#22C55E]">
                               <IndianRupee className="h-3.5 w-3.5" />
                               {Number(p.amount).toLocaleString("en-IN")}
                             </p>
-                            <button
-                              type="button"
-                              onClick={() => startEditPayment(p)}
-                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A] active:scale-95"
-                              aria-label="Edit payment"
-                              title="Edit payment"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </button>
+                            {!selectMode && (
+                              <button
+                                type="button"
+                                onClick={() => startEditPayment(p)}
+                                className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A] active:scale-95"
+                                aria-label="Edit payment"
+                                title="Edit payment"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ) : (
@@ -584,7 +718,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                               type="button"
                               variant="outline"
                               onClick={cancelEditPayment}
-                              className="h-9 rounded-xl border-[#E2E8F0]"
+                              className="h-9 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] hover:bg-[#F1F5F9] hover:text-[#0F172A]"
                               disabled={updatingPaymentId === p.id}
                             >
                               Cancel
