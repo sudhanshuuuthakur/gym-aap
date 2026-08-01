@@ -48,6 +48,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [showHistory, setShowHistory] = useState(false);
+  const [advanceOpen, setAdvanceOpen] = useState<Record<string, boolean>>({});
 
   const loadData = async () => {
     setLoading(true);
@@ -81,6 +82,14 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     const today = new Date();
     const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
     return Math.max(0, 30 - daysDiff);
+  };
+
+  // Date on which the current membership expires — an advance payment starts from here
+  const getExpiryDate = (payment: Payment | undefined) => {
+    if (!payment) return undefined;
+    const d = new Date(`${payment.payment_date}T00:00:00`);
+    d.setDate(d.getDate() + 30);
+    return d;
   };
 
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
@@ -125,14 +134,14 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     loadData();
   };
 
-  const handleCollect = async (member: Member) => {
+  const handleCollect = async (member: Member, advanceFrom?: Date) => {
     const raw = amounts[member.id];
     const amount = Number(raw);
     if (!raw || isNaN(amount) || amount <= 0) {
       toast.error("Enter a valid amount");
       return;
     }
-    const selectedDate = paymentDates[member.id];
+    const selectedDate = advanceFrom ?? paymentDates[member.id];
     const isoDate = selectedDate
       ? format(selectedDate, "yyyy-MM-dd")
       : new Date().toISOString().slice(0, 10);
@@ -153,9 +162,14 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       await supabase.from("admissions").update({ status: "approved" }).eq("id", member.id);
     }
     const dateLabel = selectedDate ? ` on ${format(selectedDate, "d/M/yyyy")}` : "";
-    toast.success(`₹${amount} collected from ${member.name}${dateLabel}`);
+    toast.success(
+      advanceFrom
+        ? `₹${amount} advance from ${member.name} · activates ${format(advanceFrom, "d MMM yyyy")}`
+        : `₹${amount} collected from ${member.name}${dateLabel}`
+    );
     setAmounts((a) => ({ ...a, [member.id]: "" }));
     setPaymentDates((d) => ({ ...d, [member.id]: undefined }));
+    setAdvanceOpen((o) => ({ ...o, [member.id]: false }));
     setSavingId(null);
     loadData();
   };
