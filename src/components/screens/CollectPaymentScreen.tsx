@@ -244,6 +244,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
         <div className="space-y-2.5">
           {filtered.map((m, idx) => {
             const last = latestPayment(m.id);
+            const isActive = isPaymentValid(last);
+            const expiry = getExpiryDate(last);
             return (
               <motion.div
                 key={m.id}
