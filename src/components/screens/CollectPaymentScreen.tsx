@@ -295,6 +295,59 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     <Receipt className="h-4 w-4" />
                   </button>
                 </div>
+                {isActive && expiry && !advanceOpen[m.id] ? (
+                  <button
+                    type="button"
+                    onClick={() => setAdvanceOpen((o) => ({ ...o, [m.id]: true }))}
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#F59E0B]/30 bg-[#F59E0B]/8 px-4 py-2.5 text-[12px] font-semibold text-[#F59E0B] transition-all hover:bg-[#F59E0B]/15 active:scale-95"
+                  >
+                    <Wallet className="h-3.5 w-3.5" />
+                    Advance Payment
+                  </button>
+                ) : isActive && expiry ? (
+                  <div className="mt-3 rounded-xl border border-[#F59E0B]/25 bg-[#F59E0B]/5 p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-semibold text-[#F59E0B]">Advance Payment</p>
+                      <button
+                        type="button"
+                        onClick={() => setAdvanceOpen((o) => ({ ...o, [m.id]: false }))}
+                        className="text-[11px] text-[#94A3B8] hover:text-[#0F172A]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <p className="mt-0.5 text-[10px] text-[#64748B]">
+                      Activates on {format(expiry, "d MMM yyyy")}, right after the current membership expires
+                    </p>
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
+                        <Input
+                          inputMode="numeric"
+                          placeholder={`Advance amount (Default: ₹${defaultFee})`}
+                          value={amounts[m.id] || ""}
+                          onFocus={() => {
+                            if (!amounts[m.id]) setAmounts((a) => ({ ...a, [m.id]: defaultFee.toString() }));
+                          }}
+                          onChange={(e) => setAmounts((a) => ({ ...a, [m.id]: e.target.value.replace(/[^0-9.]/g, "") }))}
+                          className="h-10 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] pl-7 text-[13px] text-[#0F172A] placeholder:text-[#64748B] focus-visible:ring-[#F59E0B]/40"
+                        />
+                      </div>
+                      <button
+                        onClick={() => handleCollect(m, expiry)}
+                        disabled={savingId === m.id}
+                        className="flex h-10 items-center gap-1.5 rounded-xl bg-[#F59E0B] px-4 text-[12px] font-semibold text-[#FFFFFF] transition-all hover:bg-[#F59E0B]/90 active:scale-95 disabled:opacity-60"
+                      >
+                        {savingId === m.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Wallet className="h-3.5 w-3.5" />
+                        )}
+                        Pay Advance
+                      </button>
+                    </div>
+                  </div>
+                ) : (
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
                     <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
@@ -390,6 +443,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     Collect
                   </button>
                 </div>
+                )}
               </motion.div>
             );
           })}
