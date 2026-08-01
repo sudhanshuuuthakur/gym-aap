@@ -246,6 +246,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
             const last = latestPayment(m.id);
             const isActive = isPaymentValid(last);
             const expiry = getExpiryDate(last);
+            const advanceFrom = isActive && expiry ? expiry : new Date();
             return (
               <motion.div
                 key={m.id}
@@ -295,16 +296,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                     <Receipt className="h-4 w-4" />
                   </button>
                 </div>
-                {isActive && expiry && !advanceOpen[m.id] ? (
-                  <button
-                    type="button"
-                    onClick={() => setAdvanceOpen((o) => ({ ...o, [m.id]: true }))}
-                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#F59E0B]/30 bg-[#F59E0B]/8 px-4 py-2.5 text-[12px] font-semibold text-[#F59E0B] transition-all hover:bg-[#F59E0B]/15 active:scale-95"
-                  >
-                    <Wallet className="h-3.5 w-3.5" />
-                    Advance Payment
-                  </button>
-                ) : isActive && expiry ? (
+                {advanceOpen[m.id] ? (
                   <div className="mt-3 rounded-xl border border-[#F59E0B]/25 bg-[#F59E0B]/5 p-3">
                     <div className="flex items-center justify-between">
                       <p className="text-[11px] font-semibold text-[#F59E0B]">Advance Payment</p>
@@ -317,7 +309,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                       </button>
                     </div>
                     <p className="mt-0.5 text-[10px] text-[#64748B]">
-                      Activates on {format(expiry, "d MMM yyyy")}, right after the current membership expires
+                      Activates on {format(advanceFrom, "d MMM yyyy")}
+                      {isActive ? ", right after the current membership expires" : ""}
                     </p>
                     <div className="mt-2.5 flex items-center gap-2">
                       <div className="relative flex-1">
@@ -334,7 +327,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                         />
                       </div>
                       <button
-                        onClick={() => handleCollect(m, expiry)}
+                        onClick={() => handleCollect(m, advanceFrom)}
                         disabled={savingId === m.id}
                         className="flex h-10 items-center gap-1.5 rounded-xl bg-[#F59E0B] px-4 text-[12px] font-semibold text-[#FFFFFF] transition-all hover:bg-[#F59E0B]/90 active:scale-95 disabled:opacity-60"
                       >
