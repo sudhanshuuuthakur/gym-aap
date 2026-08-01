@@ -340,7 +340,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                       </button>
                     </div>
                   </div>
-                ) : (
+                ) : isActive ? null : (
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
                     <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
@@ -441,7 +441,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                   <button
                     type="button"
                     onClick={() => setAdvanceOpen((o) => ({ ...o, [m.id]: true }))}
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#F59E0B] bg-[#F59E0B]/15 px-4 py-2.5 text-[12px] font-semibold text-[#B45309] transition-all hover:bg-[#F59E0B]/25 active:scale-95"
+                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#F59E0B] bg-[#F59E0B]/15 px-4 py-2.5 text-[12px] font-semibold text-[#B45309] transition-all hover:bg-[#F59E0B]/25 active:scale-95"
                   >
                     <Wallet className="h-3.5 w-3.5" />
                     Advance Payment
