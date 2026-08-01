@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowLeft, History, Search, Wallet, CheckCircle2, IndianRupee, Loader2, Calendar as CalendarIcon, Receipt, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -20,9 +21,11 @@ interface Member {
 }
 
 interface Payment {
+  id: string;
   admission_id: string;
   amount: number;
   payment_date: string;
+  method: string;
 }
 
 interface Props {
@@ -37,6 +40,11 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [search, setSearch] = useState("");
   const [amounts, setAmounts] = useState<Record<string, string>>({});
   const [paymentDates, setPaymentDates] = useState<Record<string, Date | undefined>>({});
+  const [memberHistory, setMemberHistory] = useState<Member | null>(null);
+  const [editingPaymentId, setEditingPaymentId] = useState<string | null>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editDate, setEditDate] = useState<Date | undefined>(undefined);
+  const [updatingPaymentId, setUpdatingPaymentId] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [showHistory, setShowHistory] = useState(false);
@@ -45,7 +53,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     setLoading(true);
     const [m, p] = await Promise.all([
       supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
-      (supabase as any).from("payments").select("admission_id, amount, payment_date").eq("user_id", userId).order("payment_date", { ascending: false }),
+      (supabase as any).from("payments").select("id, admission_id, amount, payment_date, method").eq("user_id", userId).order("payment_date", { ascending: false }),
     ]);
     if (m.data) setMembers(m.data);
     if (p.data) setPayments(p.data as Payment[]);
@@ -76,6 +84,46 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   };
 
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
+
+  const startEditPayment = (payment: Payment) => {
+    setEditingPaymentId(payment.id);
+    setEditAmount(String(payment.amount ?? ""));
+    setEditDate(new Date(`${payment.payment_date}T00:00:00`));
+  };
+
+  const cancelEditPayment = () => {
+    setEditingPaymentId(null);
+    setEditAmount("");
+    setEditDate(undefined);
+  };
+
+  const saveEditPayment = async (payment: Payment) => {
+    const amount = Number(editAmount);
+    if (!editAmount || isNaN(amount) || amount <= 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    if (!editDate) {
+      toast.error("Select a payment date");
+      return;
+    }
+    const payment_date = format(editDate, "yyyy-MM-dd");
+    setUpdatingPaymentId(payment.id);
+    const { error } = await supabase
+      .from("payments")
+      .update({ amount, payment_date })
+      .eq("id", payment.id)
+      .eq("user_id", userId);
+    if (error) {
+      toast.error(error.message);
+      setUpdatingPaymentId(null);
+      return;
+    }
+    toast.success("Payment updated");
+    setUpdatingPaymentId(null);
+    cancelEditPayment();
+    loadData();
+  };
 
   const handleCollect = async (member: Member) => {
     const raw = amounts[member.id];
@@ -221,6 +269,15 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                       </p>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setMemberHistory(m)}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#F59E0B] transition-colors hover:bg-[#F8FAFC] active:scale-95"
+                    aria-label="View payment history"
+                    title="View payment history"
+                  >
+                    <Receipt className="h-4 w-4" />
+                  </button>
                 </div>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="relative flex-1">
@@ -322,6 +379,165 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
           })}
         </div>
       )}
+      <Dialog
+        open={!!memberHistory}
+        onOpenChange={(o) => {
+          if (!o) {
+            setMemberHistory(null);
+            cancelEditPayment();
+          }
+        }}
+      >
+        <DialogContent className="w-[calc(100%-24px)] max-w-md rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-4 text-[#0F172A] shadow-xl">
+          <DialogHeader className="space-y-0.5 pr-8 text-left">
+            <DialogTitle className="text-[16px] font-bold tracking-tight text-[#0F172A]">
+              {memberHistory?.name} · Payments
+            </DialogTitle>
+            <p className="text-[12px] text-[#94A3B8]">
+              {memberHistory?.phone || "No phone number"}
+            </p>
+          </DialogHeader>
+          <div className="mt-3 max-h-[60vh] space-y-2 overflow-auto pr-1">
+            {memberHistory &&
+            payments.filter((p) => p.admission_id === memberHistory.id).length === 0 ? (
+              <div className="py-10 text-center text-[13px] text-[#64748B]">
+                No payments recorded for this member
+              </div>
+            ) : (
+              memberHistory &&
+              payments
+                .filter((p) => p.admission_id === memberHistory.id)
+                .map((p) => {
+                  const isEditing = editingPaymentId === p.id;
+                  return (
+                    <div
+                      key={p.id}
+                      className="rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] px-4 py-3"
+                    >
+                      {!isEditing ? (
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-[13px] font-semibold text-[#0F172A]">
+                              {new Date(`${p.payment_date}T00:00:00`).toLocaleDateString("en-IN")}
+                            </p>
+                            <p className="mt-0.5 text-[11px] capitalize text-[#64748B]">
+                              {p.method || "cash"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="flex items-center text-[13px] font-semibold text-[#22C55E]">
+                              <IndianRupee className="h-3.5 w-3.5" />
+                              {Number(p.amount).toLocaleString("en-IN")}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => startEditPayment(p)}
+                              className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F8FAFC] hover:text-[#0F172A] active:scale-95"
+                              aria-label="Edit payment"
+                              title="Edit payment"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <IndianRupee className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#64748B]" />
+                              <Input
+                                inputMode="numeric"
+                                value={editAmount}
+                                onChange={(e) =>
+                                  setEditAmount(e.target.value.replace(/[^0-9.]/g, ""))
+                                }
+                                className="h-10 rounded-xl border-[#E2E8F0] bg-[#FFFFFF] pl-7 text-[13px] text-[#0F172A] placeholder:text-[#64748B]"
+                              />
+                            </div>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#64748B] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A] active:scale-95",
+                                    editDate && "border-[#22C55E]/50 bg-[#22C55E]/5 text-[#22C55E]",
+                                  )}
+                                  aria-label="Select payment date"
+                                  title={editDate ? `Date: ${format(editDate, "PPP")}` : "Select date"}
+                                >
+                                  <CalendarIcon className="h-4 w-4" />
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto rounded-2xl border border-[#E2E8F0] bg-white p-0 text-[#0F172A] shadow-xl z-[99999] !overflow-visible"
+                                sideOffset={6}
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={editDate}
+                                  onSelect={(date) => setEditDate(date)}
+                                  initialFocus
+                                  disabled={(date) => date > new Date()}
+                                  className="p-3"
+                                  classNames={{
+                                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                                    month: "space-y-4",
+                                    caption: "flex justify-center pt-1 relative items-center",
+                                    caption_label: "text-sm font-semibold text-[#0F172A]",
+                                    nav: "space-x-1 flex items-center",
+                                    nav_button: cn(
+                                      "h-8 w-8 rounded-md border border-[#E2E8F0] bg-white p-0 text-[#334155] hover:bg-[#F1F5F9] inline-flex items-center justify-center"
+                                    ),
+                                    nav_button_previous: "absolute left-1",
+                                    nav_button_next: "absolute right-1",
+                                    table: "w-full border-collapse space-y-1",
+                                    head_row: "flex",
+                                    head_cell: "text-[#94A3B8] rounded-md w-9 font-medium text-[0.75rem] m-0.5",
+                                    row: "flex w-full mt-1",
+                                    cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-[#22C55E]/10 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20 rounded-md",
+                                    day: "h-9 w-9 p-0 font-normal text-[#334155] hover:bg-[#F1F5F9] rounded-md inline-flex items-center justify-center aria-selected:opacity-100 transition-colors",
+                                    day_selected: "bg-[#22C55E] text-white hover:bg-[#16A34A] hover:text-white focus:bg-[#22C55E] rounded-md",
+                                    day_today: "bg-[#F1F5F9] text-[#0F172A] font-semibold",
+                                    day_outside: "text-[#CBD5E1] opacity-40",
+                                    day_disabled: "text-[#CBD5E1] opacity-40 hover:bg-transparent",
+                                    day_hidden: "invisible",
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={cancelEditPayment}
+                              className="h-9 rounded-xl border-[#E2E8F0]"
+                              disabled={updatingPaymentId === p.id}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={() => saveEditPayment(p)}
+                              className="h-9 rounded-xl bg-[#22C55E] text-white hover:bg-[#22C55E]/90"
+                              disabled={updatingPaymentId === p.id}
+                            >
+                              {updatingPaymentId === p.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                "Save"
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
