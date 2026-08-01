@@ -437,7 +437,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                   </button>
                 </div>
                 )}
-                {!advanceOpen[m.id] && (
+                {isActive && !advanceOpen[m.id] && (
                   <button
                     type="button"
                     onClick={() => setAdvanceOpen((o) => ({ ...o, [m.id]: true }))}
