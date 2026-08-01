@@ -437,6 +437,16 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                   </button>
                 </div>
                 )}
+                {!advanceOpen[m.id] && (
+                  <button
+                    type="button"
+                    onClick={() => setAdvanceOpen((o) => ({ ...o, [m.id]: true }))}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-[#F59E0B] bg-[#F59E0B]/15 px-4 py-2.5 text-[12px] font-semibold text-[#B45309] transition-all hover:bg-[#F59E0B]/25 active:scale-95"
+                  >
+                    <Wallet className="h-3.5 w-3.5" />
+                    Advance Payment
+                  </button>
+                )}
               </motion.div>
             );
           })}
