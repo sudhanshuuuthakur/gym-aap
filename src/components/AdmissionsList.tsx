@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Mail, Phone, MoreVertical, Pencil, Trash2, Eye } from "lucide-react";
+import { UserPlus, Users, Mail, Phone, MoreVertical, Pencil, Trash2, Eye, Send } from "lucide-react";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { EditMemberDialog } from "@/components/EditMemberDialog";
 import { MemberProfileDialog } from "@/components/MemberProfileDialog";
+import { SendMessageDialog } from "@/components/SendMessageDialog";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { motion } from "framer-motion";
 import {
@@ -50,14 +51,24 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const [viewing, setViewing] = useState<Admission | null>(null);
   const [deleting, setDeleting] = useState<Admission | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [messaging, setMessaging] = useState<Admission | null>(null);
+  const [gymName, setGymName] = useState("");
 
   const fetchAdmissions = useCallback(async () => {
-    const { data } = await supabase
-      .from("admissions")
-      .select("id, name, email, phone, status, created_at, join_date, age, height, weight")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    setAdmissions((data as Admission[]) || []);
+    const [memberRes, profileRes] = await Promise.all([
+      supabase
+        .from("admissions")
+        .select("id, name, email, phone, status, created_at, join_date, age, height, weight")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", userId)
+        .single(),
+    ]);
+    setAdmissions((memberRes.data as Admission[]) || []);
+    if (profileRes.data) setGymName((profileRes.data as { display_name: string | null }).display_name || "");
     setLoading(false);
   }, [userId]);
 
@@ -163,6 +174,12 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
                           <Eye className="mr-2 h-4 w-4" /> View profile
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          onClick={() => setMessaging(admission)}
+                          className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
+                        >
+                          <Send className="mr-2 h-4 w-4" /> Send Message
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => setEditing(admission)}
                           className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
                         >
@@ -202,6 +219,14 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
         open={!!viewing}
         onOpenChange={(o) => !o && setViewing(null)}
         member={viewing}
+      />
+
+      <SendMessageDialog
+        open={!!messaging}
+        onOpenChange={(o) => !o && setMessaging(null)}
+        memberName={messaging?.name || ""}
+        memberPhone={messaging?.phone || null}
+        gymName={gymName}
       />
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
