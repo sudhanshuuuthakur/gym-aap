@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Mail, Phone, MoreVertical, Pencil, Trash2, Eye } from "lucide-react";
+import { UserPlus, Users, Mail, Phone, MoreVertical, Pencil, Trash2, Eye, Send } from "lucide-react";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { EditMemberDialog } from "@/components/EditMemberDialog";
 import { MemberProfileDialog } from "@/components/MemberProfileDialog";
+import { SendMessageDialog } from "@/components/SendMessageDialog";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { motion } from "framer-motion";
 import {
