@@ -221,6 +221,14 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
         member={viewing}
       />
 
+      <SendMessageDialog
+        open={!!messaging}
+        onOpenChange={(o) => !o && setMessaging(null)}
+        memberName={messaging?.name || ""}
+        memberPhone={messaging?.phone || null}
+        gymName={gymName}
+      />
+
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
         <AlertDialogContent className="border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A]">
           <AlertDialogHeader>
