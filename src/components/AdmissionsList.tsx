@@ -51,6 +51,8 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const [viewing, setViewing] = useState<Admission | null>(null);
   const [deleting, setDeleting] = useState<Admission | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [messaging, setMessaging] = useState<Admission | null>(null);
+  const [gymName, setGymName] = useState("");
 
   const fetchAdmissions = useCallback(async () => {
     const { data } = await supabase
