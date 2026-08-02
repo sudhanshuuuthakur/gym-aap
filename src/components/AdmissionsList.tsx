@@ -174,6 +174,12 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
                           <Eye className="mr-2 h-4 w-4" /> View profile
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          onClick={() => setMessaging(admission)}
+                          className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
+                        >
+                          <Send className="mr-2 h-4 w-4" /> Send Message
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => setEditing(admission)}
                           className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
                         >
