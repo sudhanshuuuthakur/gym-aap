@@ -55,12 +55,20 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const [gymName, setGymName] = useState("");
 
   const fetchAdmissions = useCallback(async () => {
-    const { data } = await supabase
-      .from("admissions")
-      .select("id, name, email, phone, status, created_at, join_date, age, height, weight")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    setAdmissions((data as Admission[]) || []);
+    const [memberRes, profileRes] = await Promise.all([
+      supabase
+        .from("admissions")
+        .select("id, name, email, phone, status, created_at, join_date, age, height, weight")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", userId)
+        .single(),
+    ]);
+    setAdmissions((memberRes.data as Admission[]) || []);
+    if (profileRes.data) setGymName((profileRes.data as { display_name: string | null }).display_name || "");
     setLoading(false);
   }, [userId]);
 
