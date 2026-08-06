@@ -1,6 +1,8 @@
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
-import { LogOut, Settings, User, ChevronRight } from "lucide-react";
+import { LogOut, Settings, User, ChevronRight, Download, Share } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useInstallApp } from "@/hooks/useInstallApp";
+import { toast } from "sonner";
 
 interface InfoScreenProps {
   greeting: string;
@@ -8,8 +10,23 @@ interface InfoScreenProps {
 }
 
 export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
+  const { canInstall, installed, install, isIos } = useInstallApp();
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleInstall = async () => {
+    if (canInstall) {
+      const outcome = await install();
+      if (outcome === "dismissed") toast.info("Installation cancelled");
+      return;
+    }
+    if (isIos) {
+      toast.info("Tap the Share button in Safari, then choose \"Add to Home Screen\".");
+      return;
+    }
+    toast.info("Open your browser menu and choose \"Install app\" or \"Add to Home screen\".");
   };
 
   return (
@@ -43,6 +60,30 @@ export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
           <ChevronRight className="h-4 w-4 text-[#64748B]" />
         </button>
         <div className="mx-3 h-px bg-[#F1F5F9]" />
+        {!installed && (
+          <>
+            <button
+              onClick={handleInstall}
+              className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E]">
+                {isIos && !canInstall ? (
+                  <Share className="h-4 w-4" strokeWidth={2} />
+                ) : (
+                  <Download className="h-4 w-4" strokeWidth={2} />
+                )}
+              </div>
+              <span className="flex-1">
+                <span className="block text-[14px] font-medium text-[#0F172A]">Install App</span>
+                <span className="block text-[12px] text-[#94A3B8]">
+                  Add Gym Manager to your home screen
+                </span>
+              </span>
+              <ChevronRight className="h-4 w-4 text-[#64748B]" />
+            </button>
+            <div className="mx-3 h-px bg-[#F1F5F9]" />
+          </>
+        )}
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
