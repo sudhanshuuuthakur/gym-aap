@@ -84,6 +84,8 @@ export function InfoScreen({ greeting, onEditProfile }: InfoScreenProps) {
           <ChevronRight className="h-4 w-4 text-[#64748B]" />
         </button>
       </SurfaceCard>
+
+      <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
     </div>
   );
 }
