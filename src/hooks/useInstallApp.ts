@@ -18,6 +18,15 @@ function isIos() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
 
+function inIframe() {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
 export function useInstallApp() {
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(isStandalone());
@@ -47,5 +56,11 @@ export function useInstallApp() {
     return outcome;
   };
 
-  return { canInstall: !!promptEvent, installed, install, isIos: isIos() };
+  return {
+    canInstall: !!promptEvent,
+    installed,
+    install,
+    isIos: isIos(),
+    inPreviewFrame: inIframe(),
+  };
 }
