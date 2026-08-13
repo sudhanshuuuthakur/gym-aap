@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { MembershipStats } from "@/components/MembershipStats";
 import { ActionCard } from "@/components/premium/ActionCard";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
+import { InstallBanner } from "@/components/InstallBanner";
 import { UserPlus, ClipboardCheck, Wallet, CalendarClock, ChevronRight } from "lucide-react";
 
 interface HomeScreenProps {
@@ -25,6 +26,8 @@ export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onColl
 
   return (
     <div className="space-y-7">
+      <InstallBanner />
+
       {/* Welcome */}
       <motion.section
         initial={{ opacity: 0, y: 12 }}

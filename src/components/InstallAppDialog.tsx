@@ -35,9 +35,9 @@ export function InstallAppDialog({ open, onOpenChange }: InstallAppDialogProps) 
         { icon: <Check className="h-4 w-4" strokeWidth={2} />, text: 'Tap "Add" — the icon appears on your home screen' },
       ]
     : [
-        { icon: <MoreVertical className="h-4 w-4" strokeWidth={2} />, text: "Open your browser menu (⋮)" },
-        { icon: <Download className="h-4 w-4" strokeWidth={2} />, text: 'Tap "Install app" or "Add to Home screen"' },
-        { icon: <Check className="h-4 w-4" strokeWidth={2} />, text: "Confirm — Gym Manager opens like a real app" },
+        { icon: <MoreVertical className="h-4 w-4" strokeWidth={2} />, text: "In Chrome, tap the ⋮ menu (top-right)" },
+        { icon: <Download className="h-4 w-4" strokeWidth={2} />, text: 'Tap "Add to Home screen", then "Install"' },
+        { icon: <Check className="h-4 w-4" strokeWidth={2} />, text: "The Gym Manager icon appears in your app drawer" },
       ];
 
   return (
