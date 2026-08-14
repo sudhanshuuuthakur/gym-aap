@@ -5,6 +5,7 @@ import { Bell, Dumbbell } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { BottomNav, type Screen } from "@/components/BottomNav";
+import { HeaderInstallButton } from "@/components/HeaderInstallButton";
 import { HomeScreen } from "@/components/screens/HomeScreen";
 import { MembersScreen } from "@/components/screens/MembersScreen";
 import { InfoScreen } from "@/components/screens/InfoScreen";
@@ -51,13 +52,16 @@ export function Dashboard({ session }: DashboardProps) {
             </div>
             <span className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Gym Manager</span>
           </div>
-          <button
-            aria-label="Notifications"
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
-          >
-            <Bell className="h-4 w-4" strokeWidth={2} />
-            <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#EF4444]" />
-          </button>
+          <div className="flex items-center gap-2">
+            <HeaderInstallButton />
+            <button
+              aria-label="Notifications"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
+            >
+              <Bell className="h-4 w-4" strokeWidth={2} />
+              <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#EF4444]" />
+            </button>
+          </div>
         </div>
       </header>
 
