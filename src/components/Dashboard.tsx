@@ -50,7 +50,7 @@ export function Dashboard({ session }: DashboardProps) {
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22C55E]/12">
               <Dumbbell className="h-4 w-4 text-[#22C55E]" strokeWidth={2.25} />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Gym Manager</span>
+            <span className="text-[15px] font-semibold tracking-tight text-[#0F172A]">mygympal</span>
           </div>
           <div className="flex items-center gap-2">
             <HeaderInstallButton />
