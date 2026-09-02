@@ -42,22 +42,24 @@ export function Dashboard({ session }: DashboardProps) {
   const greeting = displayName || phone;
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-[#FFFFFF] text-[#0F172A]">
+    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-background text-foreground">
+      <div className="pointer-events-none absolute inset-0 app-grid opacity-50" aria-hidden />
+      <div className="pointer-events-none absolute -right-32 top-20 h-80 w-80 rounded-full bg-primary/10 blur-3xl" aria-hidden />
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-[#E2E8F0] bg-[#FFFFFF]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-border/80 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 pt-5 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22C55E]/12">
-              <Dumbbell className="h-4 w-4 text-[#22C55E]" strokeWidth={2.25} />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary/35 bg-primary/10">
+              <Dumbbell className="h-4 w-4 text-primary" strokeWidth={2.25} />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight text-[#0F172A]">MY GYM PAL
+             <span className="text-[15px] font-semibold tracking-tight text-foreground">MY GYM PAL
 </span>
           </div>
           <div className="flex items-center gap-2">
             <HeaderInstallButton />
             <button
               aria-label="Notifications"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#E2E8F0] bg-[#FFFFFF] text-[#94A3B8] transition-colors hover:text-[#0F172A] active:scale-95"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary active:scale-95"
             >
               <Bell className="h-4 w-4" strokeWidth={2} />
               <span className="absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-[#EF4444]" />
