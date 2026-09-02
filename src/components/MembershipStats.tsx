@@ -70,7 +70,7 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
 
   if (loading) {
     return (
-      <SurfaceCard className="py-10 text-center text-sm text-[#64748B]">
+        <SurfaceCard className="py-10 text-center text-sm text-muted-foreground">
         Loading stats…
       </SurfaceCard>
     );
@@ -79,10 +79,13 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
   return (
     <SurfaceCard className="p-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Membership Overview</h2>
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">04 / Live dashboard</p>
+          <h2 className="mt-1 text-[15px] font-semibold tracking-tight text-foreground">Membership Overview</h2>
+        </div>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-[#0F172A]"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-secondary px-3 py-1.5 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           This Month
           <ChevronDown className="h-3.5 w-3.5" />
@@ -96,25 +99,25 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
       </div>
 
       {/* Payment collection */}
-      <div className="mt-5 rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] p-4">
+      <div className="mt-5 rounded-xl border border-primary/20 bg-primary/[0.04] p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <TrendingUp className="h-4 w-4" strokeWidth={2} />
             </div>
             <div>
-              <p className="text-[13px] font-medium text-[#0F172A]">Payment Collection</p>
-              <p className="text-[11px] text-[#94A3B8]">{paid} of {total} members</p>
+               <p className="text-[13px] font-medium text-foreground">Payment Collection</p>
+               <p className="text-[11px] text-muted-foreground">{paid} of {total} members</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[18px] font-bold leading-none text-[#0F172A]">{paidPercent}%</p>
-            <p className="mt-1 text-[11px] font-medium text-[#22C55E]">{collectionLabel}</p>
+             <p className="text-[18px] font-bold leading-none text-foreground">{paidPercent}%</p>
+             <p className="mt-1 text-[11px] font-medium text-primary">{collectionLabel}</p>
           </div>
         </div>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-[#F1F5F9]" role="progressbar" aria-valuenow={paidPercent} aria-valuemin={0} aria-valuemax={100}>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-secondary" role="progressbar" aria-valuenow={paidPercent} aria-valuemin={0} aria-valuemax={100}>
           <div
-            className="h-full rounded-full bg-[#22C55E] transition-[width] duration-500"
+             className="h-full rounded-full bg-primary transition-[width] duration-500"
             style={{ width: `${paidPercent}%` }}
           />
         </div>
