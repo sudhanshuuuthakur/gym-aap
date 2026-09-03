@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 interface ActionCardProps {
   icon: LucideIcon;
@@ -14,35 +13,33 @@ interface ActionCardProps {
 
 const toneMap = {
   primary: {
-    iconBg: "bg-primary/10 text-primary",
-    arrow: "text-primary",
-    tint: "bg-primary/[0.04]",
+    iconBg: "bg-[#22C55E]/15 text-[#16A34A]",
+    arrow: "text-[#22C55E]",
+    tint: "bg-gradient-to-br from-[#DCFCE7] via-[#F0FDF4] to-[#FFFFFF]",
   },
   accent: {
-    iconBg: "bg-accent/10 text-accent",
-    arrow: "text-accent",
-    tint: "bg-accent/[0.04]",
+    iconBg: "bg-[#3B82F6]/15 text-[#2563EB]",
+    arrow: "text-[#3B82F6]",
+    tint: "bg-gradient-to-br from-[#DBEAFE] via-[#EFF6FF] to-[#FFFFFF]",
   },
   warning: {
-    iconBg: "bg-warning/10 text-warning",
-    arrow: "text-warning",
-    tint: "bg-warning/[0.04]",
+    iconBg: "bg-[#F59E0B]/15 text-[#D97706]",
+    arrow: "text-[#F59E0B]",
+    tint: "bg-gradient-to-br from-[#FEF3C7] via-[#FFFBEB] to-[#FFFFFF]",
   },
 };
-
-const MotionButton = motion(Button);
 
 export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "primary", index = 0 }: ActionCardProps) {
   const t = toneMap[tone];
   return (
-    <MotionButton
+    <motion.button
       onClick={onClick}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.05 * index, ease: [0.22, 1, 0.36, 1] }}
       whileTap={{ scale: 0.98 }}
       className={cn(
-        "group relative flex h-full min-h-[142px] w-full flex-col items-start justify-between overflow-hidden rounded-xl border border-border bg-card p-4 text-left shadow-[0_12px_36px_hsl(var(--background)/0.35)] transition-all hover:border-primary/40 hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+        "group relative flex h-full min-h-[148px] w-full flex-col items-start justify-between overflow-hidden rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF] p-4 text-left shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)] transition-all hover:shadow-[0_2px_4px_rgba(15,23,42,0.05),0_16px_32px_-12px_rgba(15,23,42,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/50",
       )}
       aria-label={title}
     >
@@ -53,12 +50,12 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
       <div className="relative w-full">
         <div className="flex items-end justify-between gap-1.5">
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold leading-tight text-foreground">{title}</p>
-            <p className="mt-0.5 text-[11px] leading-tight text-muted-foreground break-words">{subtitle}</p>
+            <p className="text-[12px] font-semibold leading-tight text-[#0F172A] whitespace-nowrap">{title}</p>
+            <p className="mt-0.5 text-[11px] leading-tight text-[#94A3B8] break-words">{subtitle}</p>
           </div>
           <ArrowUpRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5", t.arrow)} />
         </div>
       </div>
-    </MotionButton>
+    </motion.button>
   );
 }

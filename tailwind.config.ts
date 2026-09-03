@@ -50,10 +50,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        surface: "hsl(var(--surface))",
-        "surface-2": "hsl(var(--surface-2))",
-        success: "hsl(var(--success))",
-        glow: "hsl(var(--glow))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
