@@ -30,10 +30,12 @@ const toneMap = {
   },
 };
 
+const MotionButton = motion(Button);
+
 export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "primary", index = 0 }: ActionCardProps) {
   const t = toneMap[tone];
   return (
-    <motion(Button)
+    <MotionButton
       onClick={onClick}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
@@ -57,6 +59,6 @@ export function ActionCard({ icon: Icon, title, subtitle, onClick, tone = "prima
           <ArrowUpRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5", t.arrow)} />
         </div>
       </div>
-    </motion.button>
+    </MotionButton>
   );
 }
