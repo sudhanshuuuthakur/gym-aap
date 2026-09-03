@@ -17,7 +17,7 @@ interface HomeScreenProps {
 function getGreetingLabel() {
   const h = new Date().getHours();
   if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
+  if (h < 18) return "hi ";
   return "Good evening";
 }
 
