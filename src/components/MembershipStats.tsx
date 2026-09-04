@@ -2,7 +2,21 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { StatisticCard } from "@/components/premium/StatisticCard";
-import { CheckCircle2, Users, Clock, ChevronDown, TrendingUp } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CheckCircle2, Users, Clock, ChevronDown, TrendingUp, Check } from "lucide-react";
+
+type PeriodKey = "this" | "last" | "all";
+
+const PERIOD_LABELS: Record<PeriodKey, string> = {
+  this: "This Month",
+  last: "Last Month",
+  all: "All Time",
+};
 
 interface Member {
   id: string;
