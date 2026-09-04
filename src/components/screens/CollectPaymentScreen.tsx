@@ -261,12 +261,12 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       <SurfaceCard className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[12px] font-medium text-[#94A3B8]">Total Collected</p>
+            <p className="text-[12px] font-medium text-[#94A3B8]">Collected in {monthLabel}</p>
             <p className="mt-1 flex items-center text-[24px] font-bold text-[#0F172A]">
               <IndianRupee className="h-5 w-5" />
               {totalCollected.toLocaleString("en-IN")}
             </p>
-            <p className="mt-1 text-[11px] text-[#64748B]">{payments.length} payment{payments.length === 1 ? "" : "s"} recorded</p>
+            <p className="mt-1 text-[11px] text-[#64748B]">{monthPayments.length} payment{monthPayments.length === 1 ? "" : "s"} this month</p>
           </div>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F59E0B]/12 text-[#F59E0B]">
             <Wallet className="h-5 w-5" />
