@@ -101,13 +101,29 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
     <SurfaceCard className="p-5">
       <div className="flex items-center justify-between">
         <h2 className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Membership Overview</h2>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-[#0F172A]"
-        >
-          This Month
-          <ChevronDown className="h-3.5 w-3.5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-[#0F172A]"
+            >
+              {PERIOD_LABELS[period]}
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[9rem]">
+            {(Object.keys(PERIOD_LABELS) as PeriodKey[]).map((key) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => setPeriod(key)}
+                className="flex items-center justify-between text-[13px]"
+              >
+                {PERIOD_LABELS[key]}
+                {period === key && <Check className="h-3.5 w-3.5 text-[#22C55E]" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-2">
