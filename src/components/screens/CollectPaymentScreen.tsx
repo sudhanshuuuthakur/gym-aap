@@ -70,7 +70,15 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   }, [userId]);
 
   const latestPayment = (id: string) => payments.find((p) => p.admission_id === id);
-  const totalCollected = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const monthEnd = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
+  const monthPayments = payments.filter(
+    (p) => p.payment_date >= monthStart && p.payment_date < monthEnd,
+  );
+  const totalCollected = monthPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
+  const monthLabel = now.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
   const isPaymentValid = (payment: Payment | undefined) => {
     if (!payment) return false;
