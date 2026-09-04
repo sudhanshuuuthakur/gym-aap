@@ -70,7 +70,15 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   }, [userId]);
 
   const latestPayment = (id: string) => payments.find((p) => p.admission_id === id);
-  const totalCollected = payments.reduce((s, p) => s + Number(p.amount || 0), 0);
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const monthEnd = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
+  const monthPayments = payments.filter(
+    (p) => p.payment_date >= monthStart && p.payment_date < monthEnd,
+  );
+  const totalCollected = monthPayments.reduce((s, p) => s + Number(p.amount || 0), 0);
+  const monthLabel = now.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
 
   const isPaymentValid = (payment: Payment | undefined) => {
     if (!payment) return false;
@@ -253,12 +261,12 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       <SurfaceCard className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[12px] font-medium text-[#94A3B8]">Total Collected</p>
+            <p className="text-[12px] font-medium text-[#94A3B8]">Collected in {monthLabel}</p>
             <p className="mt-1 flex items-center text-[24px] font-bold text-[#0F172A]">
               <IndianRupee className="h-5 w-5" />
               {totalCollected.toLocaleString("en-IN")}
             </p>
-            <p className="mt-1 text-[11px] text-[#64748B]">{payments.length} payment{payments.length === 1 ? "" : "s"} recorded</p>
+            <p className="mt-1 text-[11px] text-[#64748B]">{monthPayments.length} payment{monthPayments.length === 1 ? "" : "s"} this month</p>
           </div>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F59E0B]/12 text-[#F59E0B]">
             <Wallet className="h-5 w-5" />
