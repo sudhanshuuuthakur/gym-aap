@@ -2,7 +2,21 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { StatisticCard } from "@/components/premium/StatisticCard";
-import { CheckCircle2, Users, Clock, ChevronDown, TrendingUp } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CheckCircle2, Users, Clock, ChevronDown, TrendingUp, Check } from "lucide-react";
+
+type PeriodKey = "this" | "last" | "all";
+
+const PERIOD_LABELS: Record<PeriodKey, string> = {
+  this: "This Month",
+  last: "Last Month",
+  all: "All Time",
+};
 
 interface Member {
   id: string;
@@ -25,6 +39,7 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<PeriodKey>("this");
   // reserved for future expand state
 
   useEffect(() => {
@@ -49,22 +64,28 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
     fetchStats();
   }, [userId]);
 
-  const getLatestPayment = (memberId: string) =>
-    payments.find((p) => p.admission_id === memberId);
+  const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const now = new Date();
+  const thisKey = monthKey(now);
+  const lastKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
 
-  const isPaymentValid = (payment: Payment | undefined) => {
-    if (!payment) return false;
-    const paymentDate = new Date(payment.payment_date);
-    const today = new Date();
-    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
-    return daysDiff <= 30;
+  const isPaidInPeriod = (memberId: string) => {
+    const memberPayments = payments.filter((p) => p.admission_id === memberId);
+    if (period === "all") {
+      const latest = memberPayments[0];
+      if (!latest) return false;
+      const daysDiff = Math.floor(
+        (now.getTime() - new Date(latest.payment_date).getTime()) / (1000 * 60 * 60 * 24),
+      );
+      return daysDiff <= 30;
+    }
+    const key = period === "this" ? thisKey : lastKey;
+    return memberPayments.some((p) => p.payment_date.slice(0, 7) === key);
   };
 
   const total = members.length;
-  const paidMembers = members.filter((m) => isPaymentValid(getLatestPayment(m.id)));
-  const pendingMembers = members.filter((m) => !isPaymentValid(getLatestPayment(m.id)));
-  const paid = paidMembers.length;
-  const pending = pendingMembers.length;
+  const paid = members.filter((m) => isPaidInPeriod(m.id)).length;
+  const pending = total - paid;
   const paidPercent = total > 0 ? Math.round((paid / total) * 100) : 0;
   const collectionLabel = paidPercent >= 90 ? "Excellent" : paidPercent >= 60 ? "On track" : paidPercent >= 30 ? "Needs attention" : "Critical";
 
@@ -80,13 +101,29 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
     <SurfaceCard className="p-5">
       <div className="flex items-center justify-between">
         <h2 className="text-[15px] font-semibold tracking-tight text-[#0F172A]">Membership Overview</h2>
-        <button
-          type="button"
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-[#0F172A]"
-        >
-          This Month
-          <ChevronDown className="h-3.5 w-3.5" />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F1F5F9] px-3 py-1.5 text-[12px] font-medium text-[#94A3B8] transition-colors hover:text-[#0F172A]"
+            >
+              {PERIOD_LABELS[period]}
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[9rem]">
+            {(Object.keys(PERIOD_LABELS) as PeriodKey[]).map((key) => (
+              <DropdownMenuItem
+                key={key}
+                onClick={() => setPeriod(key)}
+                className="flex items-center justify-between text-[13px]"
+              >
+                {PERIOD_LABELS[key]}
+                {period === key && <Check className="h-3.5 w-3.5 text-[#22C55E]" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-2">
