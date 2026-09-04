@@ -64,22 +64,28 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
     fetchStats();
   }, [userId]);
 
-  const getLatestPayment = (memberId: string) =>
-    payments.find((p) => p.admission_id === memberId);
+  const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  const now = new Date();
+  const thisKey = monthKey(now);
+  const lastKey = monthKey(new Date(now.getFullYear(), now.getMonth() - 1, 1));
 
-  const isPaymentValid = (payment: Payment | undefined) => {
-    if (!payment) return false;
-    const paymentDate = new Date(payment.payment_date);
-    const today = new Date();
-    const daysDiff = Math.floor((today.getTime() - paymentDate.getTime()) / (1000 * 60 * 60 * 24));
-    return daysDiff <= 30;
+  const isPaidInPeriod = (memberId: string) => {
+    const memberPayments = payments.filter((p) => p.admission_id === memberId);
+    if (period === "all") {
+      const latest = memberPayments[0];
+      if (!latest) return false;
+      const daysDiff = Math.floor(
+        (now.getTime() - new Date(latest.payment_date).getTime()) / (1000 * 60 * 60 * 24),
+      );
+      return daysDiff <= 30;
+    }
+    const key = period === "this" ? thisKey : lastKey;
+    return memberPayments.some((p) => p.payment_date.slice(0, 7) === key);
   };
 
   const total = members.length;
-  const paidMembers = members.filter((m) => isPaymentValid(getLatestPayment(m.id)));
-  const pendingMembers = members.filter((m) => !isPaymentValid(getLatestPayment(m.id)));
-  const paid = paidMembers.length;
-  const pending = pendingMembers.length;
+  const paid = members.filter((m) => isPaidInPeriod(m.id)).length;
+  const pending = total - paid;
   const paidPercent = total > 0 ? Math.round((paid / total) * 100) : 0;
   const collectionLabel = paidPercent >= 90 ? "Excellent" : paidPercent >= 60 ? "On track" : paidPercent >= 30 ? "Needs attention" : "Critical";
 
