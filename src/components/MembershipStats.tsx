@@ -39,6 +39,7 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<PeriodKey>("this");
   // reserved for future expand state
 
   useEffect(() => {
