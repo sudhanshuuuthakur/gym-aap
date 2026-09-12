@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Dumbbell } from "lucide-react";
+import { Bell, ChevronDown, UserRound } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { BottomNav, type Screen } from "@/components/BottomNav";
@@ -64,13 +64,21 @@ export function Dashboard({ session }: DashboardProps) {
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-[#E2E8F0] bg-[#FFFFFF]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 pt-5 pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22C55E]/12">
-              <Dumbbell className="h-4 w-4 text-[#22C55E]" strokeWidth={2.25} />
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight text-[#0F172A]">MY GYM PAL
-</span>
-          </div>
+          <button
+            type="button"
+            onClick={() => setEditOpen(true)}
+            aria-label="Open profile"
+            className="group flex min-w-0 items-center gap-2.5 rounded-full py-1 pr-2 text-left transition-colors hover:bg-[#F8FAFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22C55E]/40"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#22C55E]/12 text-[#22C55E] ring-1 ring-[#22C55E]/20">
+              <UserRound className="h-[18px] w-[18px]" strokeWidth={2.2} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[11px] font-medium text-[#94A3B8]">Profile</span>
+              <span className="block max-w-[145px] truncate text-[14px] font-semibold text-[#0F172A]">{greeting}</span>
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-[#94A3B8] transition-transform group-hover:translate-y-0.5" strokeWidth={2} />
+          </button>
           <div className="flex items-center gap-2">
             <HeaderInstallButton />
             <button
