@@ -45,13 +45,7 @@ export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onColl
         </p>
       </motion.section>
 
-      {/* Quick Actions */}
-      <section aria-labelledby="quick-actions-title">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 id="quick-actions-title" className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
-            Quick Actions
-          </h2>
-        </div>
+      <section>
         <div className="grid grid-cols-3 gap-2">
           <ActionCard icon={UserPlus} title="Add Member" subtitle="Register new" onClick={onAddMember} tone="primary" index={0} />
           <ActionCard icon={ClipboardCheck} title="Attendance" subtitle="Check-ins" onClick={onAttendance} tone="accent" index={1} />
