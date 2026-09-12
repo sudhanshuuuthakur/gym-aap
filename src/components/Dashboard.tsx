@@ -27,6 +27,24 @@ export function Dashboard({ session }: DashboardProps) {
   const [memberFilter, setMemberFilter] = useState<"all" | "paid" | "notpaid">("all");
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Keep browser/system back in sync with in-app screens
+  useEffect(() => {
+    window.history.replaceState({ screen: "home" }, "");
+    const onPopState = (e: PopStateEvent) => {
+      const target = (e.state?.screen as Screen) || "home";
+      setScreen(target);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const navigateTo = (next: Screen) => {
+    if (next !== screen) {
+      window.history.pushState({ screen: next }, "");
+    }
+    setScreen(next);
+  };
+
   useEffect(() => {
     supabase
       .from("profiles")
