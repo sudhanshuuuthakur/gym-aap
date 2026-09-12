@@ -44,7 +44,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
               )}
               <span className="relative flex items-center gap-2">
                 <Icon className="h-[18px] w-[18px]" strokeWidth={2.2} />
-                {isActive && <span>{tab.label}</span>}
+                <span>{tab.label}</span>
               </span>
             </button>
           );
