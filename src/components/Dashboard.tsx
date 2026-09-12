@@ -27,6 +27,24 @@ export function Dashboard({ session }: DashboardProps) {
   const [memberFilter, setMemberFilter] = useState<"all" | "paid" | "notpaid">("all");
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Keep browser/system back in sync with in-app screens
+  useEffect(() => {
+    window.history.replaceState({ screen: "home" }, "");
+    const onPopState = (e: PopStateEvent) => {
+      const target = (e.state?.screen as Screen) || "home";
+      setScreen(target);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
+  const navigateTo = (next: Screen) => {
+    if (next !== screen) {
+      window.history.pushState({ screen: next }, "");
+    }
+    setScreen(next);
+  };
+
   useEffect(() => {
     supabase
       .from("profiles")
@@ -81,16 +99,16 @@ export function Dashboard({ session }: DashboardProps) {
                 userId={session.user.id}
                 greeting={greeting}
                 onAddMember={() => setAddMemberOpen(true)}
-                onAttendance={() => setScreen("attendance")}
-                onCollectPayment={() => setScreen("collect-payment")}
-                onViewMembers={(filter) => { setMemberFilter(filter); setScreen("member-list"); }}
+                onAttendance={() => navigateTo("attendance")}
+                onCollectPayment={() => navigateTo("collect-payment")}
+                onViewMembers={(filter) => { setMemberFilter(filter); navigateTo("member-list"); }}
               />
             )}
             {screen === "member-list" && (
-              <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => setScreen("home")} />
+              <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => window.history.back()} />
             )}
-            {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => setScreen("home")} />}
-            {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} onBack={() => setScreen("home")} />}
+            {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => window.history.back()} />}
+            {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} onBack={() => window.history.back()} />}
             {screen === "members" && <MembersScreen userId={session.user.id} />}
             {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
           </motion.div>
@@ -98,7 +116,7 @@ export function Dashboard({ session }: DashboardProps) {
       </main>
 
       {/* Bottom Navigation */}
-      <BottomNav active={screen} onChange={setScreen} />
+      <BottomNav active={screen} onChange={navigateTo} />
 
       <EditProfileDialog
         open={editOpen}
