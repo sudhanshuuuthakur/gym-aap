@@ -71,7 +71,7 @@ export function PhoneLoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-[22px] border border-[#E2E8F0] bg-[#FFFFFF]/95 backdrop-blur-xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
+    <div className="w-full max-w-sm rounded-[22px] p-8">
       <div className="text-center space-y-3">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#22C55E]/12 border border-[#22C55E]/25">
           <Dumbbell className="h-6 w-6 text-[#22C55E]" strokeWidth={2.25} />
