@@ -74,7 +74,7 @@ export function PhoneLoginForm() {
     <div className="w-full max-w-sm rounded-[22px] p-8">
       <div className="text-center space-y-3">
         <h2 className="text-[26px] font-bold tracking-tight text-[#0F172A]">
-          {mode === "login" ? "Gym Manager" : "Create account"}
+          {mode === "login" ? "MY Gym PAL " : "Create account"}
         </h2>
         <p className="text-[13px] text-[#94A3B8]">
           {mode === "login"
