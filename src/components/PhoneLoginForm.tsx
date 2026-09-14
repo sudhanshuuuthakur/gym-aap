@@ -138,7 +138,7 @@ export function PhoneLoginForm() {
           className="w-full text-[13px] text-[#94A3B8] hover:text-[#22C55E] transition-colors"
         >
           {mode === "login"
-            ? "Don't have an account? Sign up"
+            ? "Don't have an account? create account"
             : "Already have an account? Sign in"}
         </button>
       </div>
