@@ -34,6 +34,7 @@ const Index = () => {
       className="relative min-h-screen w-full overflow-hidden flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: `url('${loginBgAsset.url}')` }}
     >
+      <div className="absolute inset-0 z-[1] bg-white/75" />
       <div className="relative z-10">
         <PhoneLoginForm />
       </div>
