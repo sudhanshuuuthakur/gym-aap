@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PhoneLoginForm } from "@/components/PhoneLoginForm";
 import { Dashboard } from "@/components/Dashboard";
 import type { Session } from "@supabase/supabase-js";
+import loginBgAsset from "@/assets/login.background.png.asset.json";
 
 type Intensity = "subtle" | "medium" | "strong";
 
@@ -75,7 +76,7 @@ const Index = () => {
       <div
         className={`absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform scale-110 ${reducedMotion ? "" : "transition-transform duration-[1200ms] ease-out"}`}
         style={{
-          backgroundImage: "url('/gym.background.png')",
+          backgroundImage: `url('${loginBgAsset.url}')`,
           transform: `translate3d(${offset.x * -15 * p}px, ${offset.y * -15 * p}px, 0) scale(1.1)`,
         }}
       />
