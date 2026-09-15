@@ -29,7 +29,7 @@ export default {
           muted: "hsl(var(--login-muted))",
           accent: "hsl(var(--login-accent))",
           line: "hsl(var(--login-line))",
-          overlay: "hsl(var(--login-overlay) / 0.82)",
+          overlay: "hsl(var(--login-overlay) / 0.48)",
           google: "hsl(var(--login-google))",
         },
         primary: {
