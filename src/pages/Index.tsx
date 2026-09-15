@@ -31,11 +31,11 @@ const Index = () => {
 
   return (
     <div
-      className="relative min-h-screen w-full overflow-hidden flex items-center justify-center px-4 bg-cover bg-center bg-no-repeat"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat px-4 py-6"
       style={{ backgroundImage: `url('${loginBgAsset.url}')` }}
     >
-      <div className="absolute inset-0 z-[1] bg-white/75" />
-      <div className="relative z-10">
+      <div className="absolute inset-0 z-[1] bg-login-overlay" />
+      <div className="relative z-10 w-full max-w-[390px]">
         <PhoneLoginForm />
       </div>
     </div>

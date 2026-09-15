@@ -22,6 +22,16 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        login: {
+          panel: "hsl(var(--login-panel))",
+          input: "hsl(var(--login-input))",
+          foreground: "hsl(var(--login-foreground))",
+          muted: "hsl(var(--login-muted))",
+          accent: "hsl(var(--login-accent))",
+          line: "hsl(var(--login-line))",
+          overlay: "hsl(var(--login-overlay) / 0.48)",
+          google: "hsl(var(--login-google))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -65,6 +75,10 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        login: "0 20px 55px hsl(var(--login-panel) / 0.4), 0 0 28px hsl(var(--login-accent) / 0.28)",
+        "login-button": "0 8px 24px hsl(var(--login-accent) / 0.2)",
       },
       keyframes: {
         "accordion-down": {
