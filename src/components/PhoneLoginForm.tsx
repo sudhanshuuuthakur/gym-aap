@@ -159,7 +159,7 @@ export function PhoneLoginForm() {
           {loading
             ? "Please wait..."
             : mode === "login"
-            ? "Sign in"
+            ? "login"
             : "Create account"}
         </Button>
 
