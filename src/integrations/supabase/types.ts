@@ -17,6 +17,7 @@ export type Database = {
       admissions: {
         Row: {
           age: number | null
+          avatar_url: string | null
           created_at: string
           email: string | null
           height: number | null
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           age?: number | null
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           height?: number | null
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           age?: number | null
+          avatar_url?: string | null
           created_at?: string
           email?: string | null
           height?: number | null
