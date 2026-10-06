@@ -129,8 +129,13 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const filters: { key: MembersFilter; label: string }[] = [
     { key: "all", label: "All" }, { key: "paid", label: "Paid" },
     { key: "unpaid", label: "Unpaid" }, { key: "active", label: "Active" },
-    { key: "inactive", label: "Inactive" },
   ];
+  const moreFilters: { key: MembersFilter; label: string }[] = [
+    { key: "inactive", label: "Inactive" },
+    { key: "pending", label: "Pending" },
+    { key: "rejected", label: "Rejected" },
+  ];
+  const moreActive = moreFilters.some(({ key }) => key === filter);
   const filtered = admissions.filter((member) => matchesMemberFilter(member, payments, filter));
 
   return (
@@ -142,12 +147,12 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
             <p className="mt-1 text-sm text-muted-foreground">All admissions</p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2" aria-label="Member filters">
-          {filters.map(({ key, label }) => <Button key={key} size="sm" variant={filter === key ? "default" : "outline"} aria-pressed={filter === key} onClick={() => setFilter(key)} className="h-10 rounded-full px-4 text-[13px]">{label}</Button>)}
+        <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1" aria-label="Member filters">
+          {filters.map(({ key, label }) => <Button key={key} size="sm" variant={filter === key ? "default" : "outline"} aria-pressed={filter === key} onClick={() => setFilter(key)} className="h-10 shrink-0 rounded-full px-4 text-[13px]">{label}</Button>)}
           <DropdownMenu>
-            <DropdownMenuTrigger asChild><Button variant={filter === "pending" || filter === "rejected" ? "default" : "outline"} size="icon" className="h-10 w-11 rounded-full" aria-label="More member filters"><MoreHorizontal /></Button></DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild><Button variant={moreActive ? "default" : "outline"} size="icon" className="h-10 w-11 shrink-0 rounded-full" aria-label="More member filters"><MoreHorizontal /></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {(["pending", "rejected"] as const).map((key) => <DropdownMenuItem key={key} onClick={() => setFilter(key)} className="capitalize">{key}{filter === key && <Check className="ml-auto h-4 w-4" />}</DropdownMenuItem>)}
+              {moreFilters.map(({ key, label }) => <DropdownMenuItem key={key} onClick={() => setFilter(key)}>{label}{filter === key && <Check className="ml-auto h-4 w-4" />}</DropdownMenuItem>)}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
