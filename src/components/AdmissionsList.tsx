@@ -1,12 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
-import { UserPlus, Users, Mail, Phone, MoreVertical, Pencil, Trash2, Eye, Send } from "lucide-react";
+import { Users, Phone, MoreVertical, MoreHorizontal, Plus, Camera, Pencil, Trash2, Eye, Send, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MemberPhotoDialog } from "@/components/MemberPhotoDialog";
+import { matchesMemberFilter, type MembersFilter, type MemberPayment } from "@/lib/memberFilters";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { EditMemberDialog } from "@/components/EditMemberDialog";
 import { MemberProfileDialog } from "@/components/MemberProfileDialog";
 import { SendMessageDialog } from "@/components/SendMessageDialog";
-import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { motion } from "framer-motion";
 import {
   DropdownMenu,
@@ -37,6 +41,7 @@ interface Admission {
   age?: number | null;
   height?: number | null;
   weight?: number | null;
+  avatar_url?: string | null;
 }
 
 interface AdmissionsListProps {
@@ -53,24 +58,50 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [messaging, setMessaging] = useState<Admission | null>(null);
   const [gymName, setGymName] = useState("");
+  const [filter, setFilter] = useState<MembersFilter>("all");
+  const [payments, setPayments] = useState<MemberPayment[]>([]);
+  const [photoMember, setPhotoMember] = useState<Admission | null>(null);
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
+  const [loadError, setLoadError] = useState(false);
 
   const fetchAdmissions = useCallback(async () => {
-    const [memberRes, profileRes] = await Promise.all([
+    const [memberRes, profileRes, paymentRes] = await Promise.all([
       supabase
         .from("admissions")
-        .select("id, name, email, phone, status, created_at, join_date, age, height, weight")
+        .select("id, name, email, phone, status, created_at, join_date, age, height, weight, avatar_url")
         .eq("user_id", userId)
         .order("created_at", { ascending: false }),
       supabase
         .from("profiles")
         .select("display_name")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .single(),
+      supabase.from("payments").select("admission_id, payment_date").eq("user_id", userId),
     ]);
+    if (memberRes.error || paymentRes.error) {
+      setLoadError(true);
+      setLoading(false);
+      return;
+    }
+    setLoadError(false);
     setAdmissions((memberRes.data as Admission[]) || []);
+    setPayments(paymentRes.data || []);
     if (profileRes.data) setGymName((profileRes.data as { display_name: string | null }).display_name || "");
     setLoading(false);
   }, [userId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const paths = admissions.flatMap((member) => member.avatar_url ? [member.avatar_url] : []);
+    if (!paths.length) { setPhotoUrls({}); return; }
+    supabase.storage.from("avatars").createSignedUrls(paths, 3600).then(({ data }) => {
+      if (cancelled) return;
+      const urls: Record<string, string> = {};
+      data?.forEach((photo) => { if (photo.path && photo.signedUrl) urls[photo.path] = photo.signedUrl; });
+      setPhotoUrls(urls);
+    });
+    return () => { cancelled = true; };
+  }, [admissions]);
 
   useEffect(() => {
     fetchAdmissions();
@@ -91,103 +122,117 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   };
 
   const statusColor: Record<string, string> = {
-    pending: "bg-[#F59E0B]/12 text-[#F59E0B] border-[#F59E0B]/30",
-    approved: "bg-[#22C55E]/12 text-[#22C55E] border-[#22C55E]/30",
-    rejected: "bg-[#EF4444]/12 text-[#EF4444] border-[#EF4444]/30",
+    pending: "bg-secondary text-secondary-foreground border-border",
+    approved: "bg-primary/10 text-primary border-primary/20",
+    rejected: "bg-destructive/10 text-destructive border-destructive/20",
   };
+  const filters: { key: MembersFilter; label: string }[] = [
+    { key: "all", label: "All" }, { key: "paid", label: "Paid" },
+    { key: "unpaid", label: "Unpaid" }, { key: "active", label: "Active" },
+    { key: "inactive", label: "Inactive" },
+  ];
+  const filtered = admissions.filter((member) => matchesMemberFilter(member, payments, filter));
 
   return (
     <>
-      <div className="space-y-5">
+      <div className="space-y-6 pb-20">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-bold tracking-tight text-[#0F172A]">Members</h1>
-            <p className="mt-0.5 text-[12px] text-[#94A3B8]">All admissions</p>
+            <h1 className="text-3xl font-bold text-foreground">Members</h1>
+            <p className="mt-1 text-sm text-muted-foreground">All admissions</p>
           </div>
-          <button
-            onClick={() => setAddOpen(true)}
-            className="flex h-10 items-center gap-1.5 rounded-full bg-[#22C55E] px-4 text-[13px] font-semibold text-[#FFFFFF] transition-all hover:bg-[#22C55E]/90 active:scale-95"
-          >
-            <UserPlus className="h-4 w-4" /> Add
-          </button>
         </div>
-        <SurfaceCard className="p-4">
-          {loading ? (
-            <p className="py-6 text-center text-[13px] text-[#64748B]">Loading…</p>
+        <div className="flex flex-wrap items-center gap-2" aria-label="Member filters">
+          {filters.map(({ key, label }) => <Button key={key} size="sm" variant={filter === key ? "default" : "outline"} aria-pressed={filter === key} onClick={() => setFilter(key)} className="h-10 rounded-full px-4 text-[13px]">{label}</Button>)}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button variant={filter === "pending" || filter === "rejected" ? "default" : "outline"} size="icon" className="h-10 w-11 rounded-full" aria-label="More member filters"><MoreHorizontal /></Button></DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {(["pending", "rejected"] as const).map((key) => <DropdownMenuItem key={key} onClick={() => setFilter(key)} className="capitalize">{key}{filter === key && <Check className="ml-auto h-4 w-4" />}</DropdownMenuItem>)}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {(filter === "paid" || filter === "unpaid") && <p className="text-xs text-muted-foreground">Payments this month</p>}
+        <div>
+          {loadError ? (
+            <div className="py-6 text-center"><p className="text-sm text-muted-foreground">Could not load members.</p><Button variant="outline" className="mt-3" onClick={fetchAdmissions}>Try again</Button></div>
+          ) : loading ? (
+            <p className="py-6 text-center text-[13px] text-muted-foreground">Loading…</p>
           ) : admissions.length === 0 ? (
             <div className="py-10 text-center">
-              <Users className="mx-auto h-10 w-10 text-[#CBD5E1]" />
-              <p className="mt-3 text-[13px] text-[#64748B]">No admissions yet. Tap Add to create one.</p>
+              <Users className="mx-auto h-10 w-10 text-muted-foreground" />
+              <p className="mt-3 text-[13px] text-muted-foreground">No members yet.</p>
             </div>
+          ) : filtered.length === 0 ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">No members in this category.</p>
           ) : (
-            <div className="space-y-2">
-              {admissions.map((admission, idx) => (
+            <div className="space-y-3">
+              {filtered.map((admission, idx) => (
                 <motion.div
                   key={admission.id}
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(idx * 0.02, 0.2), duration: 0.25 }}
-                  className="flex items-center justify-between rounded-2xl border border-[#E2E8F0] bg-[#F1F5F9] p-4"
+                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3.5 sm:p-4"
                 >
-                  <div className="space-y-1">
-                    <p className="text-[14px] font-semibold text-[#0F172A]">{admission.name}</p>
-                    <div className="flex flex-wrap gap-3 text-[11px] text-[#94A3B8]">
-                      {admission.email && (
-                        <span className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" /> {admission.email}
-                        </span>
-                      )}
+                  <Button variant="ghost" className="h-12 w-12 shrink-0 rounded-full p-0 sm:h-14 sm:w-14" aria-label={`Photo for ${admission.name}`} title="Add or change member photo" onClick={() => setPhotoMember(admission)}>
+                    <Avatar className="h-full w-full"><AvatarImage src={admission.avatar_url ? photoUrls[admission.avatar_url] : undefined} alt={admission.name} /><AvatarFallback className="bg-primary/15 text-base font-semibold text-primary">{admission.name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</AvatarFallback></Avatar>
+                  </Button>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="break-words text-[14px] font-semibold text-foreground">{admission.name}</p>
+                    <div className="flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
                       {admission.phone && (
                         <span className="flex items-center gap-1">
                           <Phone className="h-3 w-3" /> {admission.phone}
                         </span>
                       )}
                       <span>
-                        {new Date(admission.created_at).toLocaleDateString()}
+                        {new Date(admission.join_date ? `${admission.join_date}T00:00:00` : admission.created_at).toLocaleDateString()}
                       </span>
                     </div>
+                    <Badge variant="outline" className={`rounded-full px-2 py-0 text-[10px] sm:hidden ${statusColor[admission.status] || "text-muted-foreground"}`}>{admission.status}</Badge>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-1">
                     <Badge
                       variant="outline"
-                      className={statusColor[admission.status] || "text-[#94A3B8]"}
+                      className={`hidden rounded-full sm:inline-flex ${statusColor[admission.status] || "text-muted-foreground"}`}
                     >
                       {admission.status}
                     </Badge>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button
-                          className="flex h-8 w-8 items-center justify-center rounded-full text-[#94A3B8] transition-colors hover:bg-[#F1F5F9] hover:text-[#0F172A]"
-                          aria-label="Member actions"
+                        <Button variant="ghost" size="icon"
+                          className="h-9 w-9 rounded-full text-muted-foreground"
+                          aria-label={`Actions for ${admission.name}`}
                         >
                           <MoreVertical className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent
                         align="end"
-                        className="border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A]"
+                        className="border-border bg-popover text-popover-foreground"
                       >
                         <DropdownMenuItem
                           onClick={() => setViewing(admission)}
-                          className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
+                          className="focus:bg-muted focus:text-foreground"
                         >
                           <Eye className="mr-2 h-4 w-4" /> View profile
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setPhotoMember(admission)}><Camera className="mr-2 h-4 w-4" />{admission.avatar_url ? "Change photo" : "Add photo"}</DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setMessaging(admission)}
-                          className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
+                          className="focus:bg-muted focus:text-foreground"
                         >
                           <Send className="mr-2 h-4 w-4" /> Send Message
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setEditing(admission)}
-                          className="focus:bg-[#F1F5F9] focus:text-[#0F172A]"
+                          className="focus:bg-muted focus:text-foreground"
                         >
                           <Pencil className="mr-2 h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => setDeleting(admission)}
-                          className="text-[#EF4444] focus:bg-[#EF4444]/10 focus:text-[#EF4444]"
+                          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                         >
                           <Trash2 className="mr-2 h-4 w-4" /> Delete
                         </DropdownMenuItem>
@@ -198,8 +243,11 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
               ))}
             </div>
           )}
-        </SurfaceCard>
+        </div>
       </div>
+
+      {createPortal(<div className="pointer-events-none fixed inset-x-0 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-5xl justify-end px-6"><Button size="icon" aria-label="Add member" title="Add member" onClick={() => setAddOpen(true)} className="pointer-events-auto h-14 w-14 rounded-full shadow-lg [&_svg]:size-7"><Plus /></Button></div>, document.body)}
+      <MemberPhotoDialog member={photoMember} userId={userId} photoUrl={photoMember?.avatar_url ? photoUrls[photoMember.avatar_url] : undefined} onClose={() => setPhotoMember(null)} onSaved={fetchAdmissions} />
 
       <AddAdmissionDialog
         open={addOpen}
@@ -230,21 +278,21 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
       />
 
       <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <AlertDialogContent className="border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A]">
+        <AlertDialogContent className="border-border bg-card text-card-foreground">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleting?.name}?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#94A3B8]">
+            <AlertDialogDescription className="text-muted-foreground">
               This permanently removes the member and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-[#E2E8F0] bg-[#F1F5F9] text-[#0F172A] hover:bg-[#F1F5F9] hover:text-[#0F172A]">
+            <AlertDialogCancel>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={deleteLoading}
-              className="bg-[#EF4444] text-[#0F172A] hover:bg-[#EF4444]/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {deleteLoading ? "Deleting..." : "Delete"}
             </AlertDialogAction>
