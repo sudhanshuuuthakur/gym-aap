@@ -330,6 +330,10 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
                 className="rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-4"
               >
                 <div className="flex items-center justify-between gap-3">
+                  <Avatar className="h-11 w-11 shrink-0 border border-[#E2E8F0]">
+                    <AvatarImage src={m.avatar_url ? photoUrls[m.avatar_url] : undefined} alt={m.name} />
+                    <AvatarFallback className="bg-[#22C55E]/12 text-[13px] font-semibold text-[#16A34A]">{initials(m.name)}</AvatarFallback>
+                  </Avatar>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-semibold text-[#0F172A]">{m.name}</p>
                     {m.phone && <p className="mt-0.5 text-[12px] text-[#94A3B8]">{m.phone}</p>}
@@ -538,13 +542,21 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
         }}
       >
         <DialogContent className="w-[calc(100%-24px)] max-w-md rounded-2xl border border-[#E2E8F0] bg-[#FFFFFF] p-4 text-[#0F172A] shadow-xl">
-          <DialogHeader className="space-y-0.5 pr-8 text-left">
-            <DialogTitle className="text-[16px] font-bold tracking-tight text-[#0F172A]">
-              {memberHistory?.name} · Payments
-            </DialogTitle>
-            <p className="text-[12px] text-[#94A3B8]">
-              {memberHistory?.phone || "No phone number"}
-            </p>
+          <DialogHeader className="space-y-2 pr-8 text-left">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-11 w-11 shrink-0 border border-[#E2E8F0]">
+                <AvatarImage src={memberHistory?.avatar_url ? photoUrls[memberHistory.avatar_url] : undefined} alt={memberHistory?.name} />
+                <AvatarFallback className="bg-[#22C55E]/12 text-[13px] font-semibold text-[#16A34A]">{memberHistory ? initials(memberHistory.name) : ""}</AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <DialogTitle className="text-[16px] font-bold tracking-tight text-[#0F172A]">
+                  {memberHistory?.name} · Payments
+                </DialogTitle>
+                <p className="text-[12px] text-[#94A3B8]">
+                  {memberHistory?.phone || "No phone number"}
+                </p>
+              </div>
+            </div>
           </DialogHeader>
           <div className="mt-3 flex items-center justify-between gap-2">
             <p className="text-[11px] font-medium text-[#94A3B8]">
