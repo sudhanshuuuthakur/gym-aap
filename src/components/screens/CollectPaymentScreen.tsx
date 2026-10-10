@@ -13,12 +13,14 @@ import { toast } from "sonner";
 import { PaymentHistoryScreen } from "@/components/screens/PaymentHistoryScreen";
 import { SurfaceCard } from "@/components/premium/SurfaceCard";
 import { motion } from "framer-motion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Member {
   id: string;
   name: string;
   phone: string | null;
   status: string;
+  avatar_url?: string | null;
 }
 
 interface Payment {
@@ -53,11 +55,12 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [showHistory, setShowHistory] = useState(false);
   const [advanceOpen, setAdvanceOpen] = useState<Record<string, boolean>>({});
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
 
   const loadData = async () => {
     setLoading(true);
     const [m, p] = await Promise.all([
-      supabase.from("admissions").select("id, name, phone, status").eq("user_id", userId).order("name"),
+      supabase.from("admissions").select("id, name, phone, status, avatar_url").eq("user_id", userId).order("name"),
       (supabase as any).from("payments").select("id, admission_id, amount, payment_date, method").eq("user_id", userId).order("payment_date", { ascending: false }),
     ]);
     if (m.data) setMembers(m.data);
@@ -68,6 +71,22 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   useEffect(() => {
     loadData();
   }, [userId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const paths = members.flatMap((m) => (m.avatar_url ? [m.avatar_url] : []));
+    if (!paths.length) { setPhotoUrls({}); return; }
+    supabase.storage.from("avatars").createSignedUrls(paths, 3600).then(({ data }) => {
+      if (cancelled) return;
+      const urls: Record<string, string> = {};
+      data?.forEach((photo) => { if (photo.path && photo.signedUrl) urls[photo.path] = photo.signedUrl; });
+      setPhotoUrls(urls);
+    });
+    return () => { cancelled = true; };
+  }, [members]);
+
+  const initials = (name: string) =>
+    name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
   const latestPayment = (id: string) => payments.find((p) => p.admission_id === id);
   const now = new Date();
