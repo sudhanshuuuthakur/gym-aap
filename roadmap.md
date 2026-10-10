@@ -5,3 +5,4 @@
 
 ## Collect Payment screen
 - [x] Show member profile photos on payment cards and in the payment history popup.
+- [x] Add a camera "Take photo" option when adding member and profile photos.

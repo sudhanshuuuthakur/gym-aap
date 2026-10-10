@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Camera, Check, IndianRupee, Moon, Sun, User } from "lucide-react";
+import { Camera, Check, ImagePlus, IndianRupee, Moon, Sun, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { useTheme } from "next-themes";
@@ -53,6 +53,7 @@ export function EditProfileDialog({
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
@@ -148,9 +149,23 @@ export function EditProfileDialog({
               className="hidden"
               onChange={(event) => handleAvatarChange(event.target.files?.[0])}
             />
-            <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-              <Camera className="mr-2 h-4 w-4" /> Change photo
-            </Button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              aria-label="Take profile photo with camera"
+              className="hidden"
+              onChange={(event) => handleAvatarChange(event.target.files?.[0])}
+            />
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
+                <Camera className="mr-2 h-4 w-4" /> Take photo
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <ImagePlus className="mr-2 h-4 w-4" /> Choose photo
+              </Button>
+            </div>
           </div>
           <div className="space-y-2">
             <Label className="text-muted-foreground">Display name</Label>

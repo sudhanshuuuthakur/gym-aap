@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Trash2 } from "lucide-react";
+import { Camera, ImagePlus, Loader2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,6 +16,7 @@ interface Props {
 
 export function MemberPhotoDialog({ member, userId, photoUrl, onClose, onSaved }: Props) {
   const input = useRef<HTMLInputElement>(null);
+  const cameraInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -26,6 +27,13 @@ export function MemberPhotoDialog({ member, userId, photoUrl, onClose, onSaved }
     setPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
+
+  function pick(selected: File | undefined) {
+    if (!selected) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(selected.type)) { toast.error("Choose a JPG, PNG or WEBP photo"); return; }
+    if (selected.size > 5 * 1024 * 1024) { toast.error("Photo must be smaller than 5 MB"); return; }
+    setFile(selected);
+  }
 
   async function save(remove = false) {
     if (!member || (!remove && !file)) return;
@@ -60,12 +68,17 @@ export function MemberPhotoDialog({ member, userId, photoUrl, onClose, onSaved }
         <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" aria-label="Member photo file" className="hidden" onChange={(event) => {
           const selected = event.target.files?.[0];
           event.target.value = "";
-          if (!selected) return;
-          if (!["image/jpeg", "image/png", "image/webp"].includes(selected.type)) { toast.error("Choose a JPG, PNG or WEBP photo"); return; }
-          if (selected.size > 5 * 1024 * 1024) { toast.error("Photo must be smaller than 5 MB"); return; }
-          setFile(selected);
+          pick(selected);
         }} />
-        <Button variant="outline" disabled={busy} onClick={() => input.current?.click()}><Camera />{member?.avatar_url ? "Change photo" : "Add photo"}</Button>
+        <input ref={cameraInput} type="file" accept="image/*" capture="environment" aria-label="Take member photo with camera" className="hidden" onChange={(event) => {
+          const selected = event.target.files?.[0];
+          event.target.value = "";
+          pick(selected);
+        }} />
+        <div className="flex w-full gap-2">
+          <Button variant="outline" className="flex-1" disabled={busy} onClick={() => cameraInput.current?.click()}><Camera />Take photo</Button>
+          <Button variant="outline" className="flex-1" disabled={busy} onClick={() => input.current?.click()}><ImagePlus />Choose photo</Button>
+        </div>
         {member?.avatar_url && <Button variant="ghost" className="text-destructive" disabled={busy} onClick={() => save(true)}><Trash2 />Remove photo</Button>}
       </div>
       <Button disabled={!file || busy} onClick={() => save()}>{busy && <Loader2 className="animate-spin" />}Save photo</Button>
