@@ -128,7 +128,6 @@ export function Dashboard({ session }: DashboardProps) {
           setDisplayName(name);
           setProfilePhone(nextPhone);
           setAvatarPath(nextAvatarPath);
-          setAvatarUrl(nextAvatarUrl);
         }}
       />
 
