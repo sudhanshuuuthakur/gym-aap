@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, UserRound } from "lucide-react";
+import { Bell } from "lucide-react";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { AddAdmissionDialog } from "@/components/AddAdmissionDialog";
 import { BottomNav, type Screen } from "@/components/BottomNav";
@@ -13,7 +13,6 @@ import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
 import { MemberListScreen } from "@/components/screens/MemberListScreen";
 import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen";
 import type { Session } from "@supabase/supabase-js";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface DashboardProps {
   session: Session;
@@ -23,7 +22,6 @@ export function Dashboard({ session }: DashboardProps) {
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [profilePhone, setProfilePhone] = useState<string | null>(null);
   const [avatarPath, setAvatarPath] = useState<string | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [defaultFee, setDefaultFee] = useState<number>(500);
   const [editOpen, setEditOpen] = useState(false);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
@@ -60,10 +58,6 @@ export function Dashboard({ session }: DashboardProps) {
         setDisplayName(data.display_name);
         setProfilePhone(data.phone);
         setAvatarPath(data.avatar_url);
-        if (data.avatar_url) {
-          const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(data.avatar_url, 3600);
-          setAvatarUrl(signedAvatar?.signedUrl || null);
-        }
       });
   }, [session.user.id]);
 
@@ -74,20 +68,7 @@ export function Dashboard({ session }: DashboardProps) {
     <div className="relative min-h-[100dvh] w-full bg-background text-foreground transition-colors">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 pt-5 pb-4">
-          <button
-            type="button"
-            onClick={() => setEditOpen(true)}
-            aria-label="Open profile"
-            className="flex h-11 w-11 items-center justify-center rounded-full p-0 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-          >
-            <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-              <AvatarImage src={avatarUrl || undefined} alt="Profile photo" />
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {displayName?.trim().charAt(0).toUpperCase() || <UserRound className="h-[18px] w-[18px]" strokeWidth={2.2} />}
-              </AvatarFallback>
-            </Avatar>
-          </button>
+        <div className="mx-auto flex max-w-5xl items-center justify-end px-6 pt-5 pb-4">
           <div className="flex items-center gap-2">
             <HeaderInstallButton />
             <button
