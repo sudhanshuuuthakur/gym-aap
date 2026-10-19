@@ -13,6 +13,10 @@ import { AttendanceScreen } from "@/components/screens/AttendanceScreen";
 import { MemberListScreen } from "@/components/screens/MemberListScreen";
 import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen";
 import type { Session } from "@supabase/supabase-js";
+import { GymSwitcher, type GymOption } from "@/components/GymSwitcher";
+import { ActiveGymProvider } from "@/lib/activeGym";
+import { DEFAULT_GYM_NAME, getActiveGymStorageKey } from "@/lib/gyms";
+import { toast } from "sonner";
 
 interface DashboardProps {
   session: Session;
@@ -28,6 +32,9 @@ export function Dashboard({ session }: DashboardProps) {
   const [screen, setScreen] = useState<Screen>("home");
   const [memberFilter, setMemberFilter] = useState<"all" | "paid" | "notpaid">("all");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [gyms, setGyms] = useState<GymOption[]>([]);
+  const [activeGymId, setActiveGymId] = useState<string | null>(null);
+  const [gymsLoading, setGymsLoading] = useState(true);
 
   // Keep browser/system back in sync with in-app screens
   useEffect(() => {
@@ -48,27 +55,96 @@ export function Dashboard({ session }: DashboardProps) {
   };
 
   useEffect(() => {
+    let cancelled = false;
+    const loadGyms = async () => {
+      setGymsLoading(true);
+      const { data, error } = await supabase
+        .from("gyms")
+        .select("id, name")
+        .eq("owner_id", session.user.id)
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Could not load your gyms");
+        setGymsLoading(false);
+        return;
+      }
+      let availableGyms = data ?? [];
+      if (availableGyms.length === 0) {
+        const { data: created, error: createError } = await supabase
+          .from("gyms")
+          .insert({ owner_id: session.user.id, name: DEFAULT_GYM_NAME })
+          .select("id, name")
+          .single();
+        if (cancelled) return;
+        if (created) availableGyms = [created];
+        else if (createError) {
+          const { data: retried } = await supabase
+            .from("gyms")
+            .select("id, name")
+            .eq("owner_id", session.user.id)
+            .order("created_at", { ascending: true });
+          availableGyms = retried ?? [];
+        }
+      }
+      setGyms(availableGyms);
+      if (availableGyms.length) {
+        const storedId = window.localStorage.getItem(getActiveGymStorageKey(session.user.id));
+        const selected = availableGyms.find((gym) => gym.id === storedId) ?? availableGyms[0];
+        setActiveGymId(selected.id);
+        window.localStorage.setItem(getActiveGymStorageKey(session.user.id), selected.id);
+      }
+      setGymsLoading(false);
+    };
+    void loadGyms();
     supabase
       .from("profiles")
       .select("display_name, phone, avatar_url")
       .eq("user_id", session.user.id)
       .single()
-      .then(async ({ data }) => {
+      .then(({ data }) => {
+        if (cancelled) return;
         if (!data) return;
         setDisplayName(data.display_name);
         setProfilePhone(data.phone);
         setAvatarPath(data.avatar_url);
       });
+    return () => { cancelled = true; };
   }, [session.user.id]);
+
+  const selectGym = (gymId: string) => {
+    setActiveGymId(gymId);
+    window.localStorage.setItem(getActiveGymStorageKey(session.user.id), gymId);
+    setScreen("home");
+    window.history.replaceState({ screen: "home" }, "");
+    setRefreshKey((key) => key + 1);
+  };
+
+  const createGym = async (name: string) => {
+    const { data, error } = await supabase
+      .from("gyms")
+      .insert({ owner_id: session.user.id, name })
+      .select("id, name")
+      .single();
+    if (error || !data) {
+      toast.error("Could not create gym. Please try again.");
+      throw error ?? new Error("Gym was not created");
+    }
+    setGyms((current) => [...current, data]);
+    selectGym(data.id);
+    toast.success(`${data.name} created`);
+  };
 
   const phone = session.user.user_metadata?.phone || "Owner";
   const greeting = displayName || phone;
 
   return (
+    <ActiveGymProvider value={activeGymId}>
     <div className="relative min-h-[100dvh] w-full bg-background text-foreground transition-colors">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-end px-6 pt-5 pb-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pt-5 pb-4 sm:px-6">
+          {!gymsLoading && activeGymId && <GymSwitcher gyms={gyms} activeGymId={activeGymId} onSelect={selectGym} onCreate={createGym} />}
           <div className="flex items-center gap-2">
             <HeaderInstallButton />
             <button
@@ -84,6 +160,7 @@ export function Dashboard({ session }: DashboardProps) {
 
       {/* Screen Content */}
       <main className="relative mx-auto max-w-5xl px-6 pt-6 pb-32">
+        {gymsLoading || !activeGymId ? <div className="py-12 text-center text-sm text-muted-foreground">Loading your gym…</div> : (
         <AnimatePresence mode="wait">
           <motion.div
             key={screen + "-" + refreshKey}
@@ -95,6 +172,7 @@ export function Dashboard({ session }: DashboardProps) {
             {screen === "home" && (
               <HomeScreen
                 userId={session.user.id}
+                gymId={activeGymId}
                 greeting={greeting}
                 onAddMember={() => setAddMemberOpen(true)}
                 onAttendance={() => navigateTo("attendance")}
@@ -103,14 +181,15 @@ export function Dashboard({ session }: DashboardProps) {
               />
             )}
             {screen === "member-list" && (
-              <MemberListScreen userId={session.user.id} filter={memberFilter} onBack={() => window.history.back()} />
+              <MemberListScreen userId={session.user.id} gymId={activeGymId} filter={memberFilter} onBack={() => window.history.back()} />
             )}
-            {screen === "attendance" && <AttendanceScreen userId={session.user.id} onBack={() => window.history.back()} />}
-            {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} onBack={() => window.history.back()} />}
-            {screen === "members" && <MembersScreen userId={session.user.id} />}
+            {screen === "attendance" && <AttendanceScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
+            {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
+            {screen === "members" && <MembersScreen userId={session.user.id} gymId={activeGymId} />}
             {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
           </motion.div>
         </AnimatePresence>
+        )}
       </main>
 
       {/* Bottom Navigation */}
@@ -120,6 +199,7 @@ export function Dashboard({ session }: DashboardProps) {
         open={editOpen}
         onOpenChange={setEditOpen}
         userId={session.user.id}
+        gymId={activeGymId ?? ""}
         currentDisplayName={displayName}
         currentPhone={profilePhone || phone}
         currentAvatarPath={avatarPath}
@@ -138,5 +218,6 @@ export function Dashboard({ session }: DashboardProps) {
         onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>
+    </ActiveGymProvider>
   );
 }

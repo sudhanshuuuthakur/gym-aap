@@ -9,12 +9,13 @@ import { toast } from "sonner";
 interface Props {
   member: { id: string; name: string; avatar_url?: string | null } | null;
   userId: string;
+  gymId: string;
   photoUrl?: string;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function MemberPhotoDialog({ member, userId, photoUrl, onClose, onSaved }: Props) {
+export function MemberPhotoDialog({ member, userId, gymId, photoUrl, onClose, onSaved }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const cameraInput = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -46,7 +47,7 @@ export function MemberPhotoDialog({ member, userId, photoUrl, onClose, onSaved }
         const { error } = await supabase.storage.from("avatars").upload(newPath, file, { contentType: file.type });
         if (error) throw error;
       }
-      const { data, error } = await supabase.from("admissions").update({ avatar_url: newPath }).eq("id", member.id).eq("user_id", userId).select("id").single();
+      const { data, error } = await supabase.from("admissions").update({ avatar_url: newPath }).eq("id", member.id).eq("user_id", userId).eq("gym_id", gymId).select("id").single();
       if (error || !data) {
         if (newPath) await supabase.storage.from("avatars").remove([newPath]);
         throw error || new Error("Member not found");

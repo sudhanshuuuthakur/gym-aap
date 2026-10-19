@@ -8,6 +8,13 @@
       "when": 1791312605348,
       "tag": "0000_add_member_photo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792408201647,
+      "tag": "0001_add_multi_gym_ownership",
+      "breakpoints": true
     }
   ]
 }

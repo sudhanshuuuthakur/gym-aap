@@ -7,6 +7,7 @@ import { UserPlus, ClipboardCheck, Wallet, CalendarClock, ChevronRight } from "l
 
 interface HomeScreenProps {
   userId: string;
+  gymId: string;
   greeting: string;
   onAddMember?: () => void;
   onAttendance?: () => void;
@@ -21,7 +22,7 @@ function getGreetingLabel() {
   return "Good evening";
 }
 
-export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onCollectPayment, onViewMembers }: HomeScreenProps) {
+export function HomeScreen({ userId, gymId, greeting, onAddMember, onAttendance, onCollectPayment, onViewMembers }: HomeScreenProps) {
   const salutation = getGreetingLabel();
 
   return (
@@ -54,7 +55,7 @@ export function HomeScreen({ userId, greeting, onAddMember, onAttendance, onColl
       </section>
 
       {/* Membership Overview */}
-      <MembershipStats userId={userId} onViewMembers={onViewMembers} />
+      <MembershipStats userId={userId} gymId={gymId} onViewMembers={onViewMembers} />
 
       {/* Upcoming Reminders */}
       <section aria-labelledby="reminders-title">

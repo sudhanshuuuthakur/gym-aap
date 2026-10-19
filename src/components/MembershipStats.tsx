@@ -32,10 +32,11 @@ interface Payment {
 
 interface MembershipStatsProps {
   userId: string;
+  gymId: string;
   onViewMembers?: (filter: "all" | "paid" | "notpaid") => void;
 }
 
-export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps) {
+export function MembershipStats({ userId, gymId, onViewMembers }: MembershipStatsProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,11 +50,13 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
           .from("admissions")
           .select("id, name, status")
           .eq("user_id", userId)
+          .eq("gym_id", gymId)
           .order("name"),
         (supabase as any)
           .from("payments")
           .select("admission_id, amount, payment_date")
           .eq("user_id", userId)
+          .eq("gym_id", gymId)
           .order("payment_date", { ascending: false }),
       ]);
 
@@ -62,7 +65,7 @@ export function MembershipStats({ userId, onViewMembers }: MembershipStatsProps)
       setLoading(false);
     }
     fetchStats();
-  }, [userId]);
+  }, [userId, gymId]);
 
   const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   const now = new Date();
