@@ -46,9 +46,10 @@ interface Admission {
 
 interface AdmissionsListProps {
   userId: string;
+  gymId: string;
 }
 
-export function AdmissionsList({ userId }: AdmissionsListProps) {
+export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
   const [admissions, setAdmissions] = useState<Admission[]>([]);
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
@@ -70,13 +71,14 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
         .from("admissions")
         .select("id, name, email, phone, status, created_at, join_date, age, height, weight, avatar_url")
         .eq("user_id", userId)
+        .eq("gym_id", gymId)
         .order("created_at", { ascending: false }),
       supabase
         .from("profiles")
         .select("display_name")
         .eq("user_id", userId)
         .single(),
-      supabase.from("payments").select("admission_id, payment_date").eq("user_id", userId),
+      supabase.from("payments").select("admission_id, payment_date").eq("user_id", userId).eq("gym_id", gymId),
     ]);
     if (memberRes.error || paymentRes.error) {
       setLoadError(true);
@@ -88,7 +90,7 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
     setPayments(paymentRes.data || []);
     if (profileRes.data) setGymName((profileRes.data as { display_name: string | null }).display_name || "");
     setLoading(false);
-  }, [userId]);
+  }, [userId, gymId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,7 +112,7 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
   const handleDelete = async () => {
     if (!deleting) return;
     setDeleteLoading(true);
-    const { error } = await supabase.from("admissions").delete().eq("id", deleting.id);
+    const { error } = await supabase.from("admissions").delete().eq("id", deleting.id).eq("user_id", userId).eq("gym_id", gymId);
     setDeleteLoading(false);
     if (error) {
       toast.error("Failed to delete member");
@@ -258,6 +260,7 @@ export function AdmissionsList({ userId }: AdmissionsListProps) {
         open={addOpen}
         onOpenChange={setAddOpen}
         userId={userId}
+        gymId={gymId}
         onAdded={fetchAdmissions}
       />
 

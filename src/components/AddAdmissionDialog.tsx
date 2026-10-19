@@ -21,6 +21,7 @@ interface AddAdmissionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
+  gymId: string;
   onAdded: () => void;
 }
 
@@ -28,6 +29,7 @@ export function AddAdmissionDialog({
   open,
   onOpenChange,
   userId,
+  gymId,
   onAdded,
 }: AddAdmissionDialogProps) {
   const [name, setName] = useState("");
@@ -60,6 +62,7 @@ export function AddAdmissionDialog({
     setLoading(true);
     const { error } = await supabase.from("admissions").insert({
       user_id: userId,
+      gym_id: gymId,
       name: name.trim(),
       phone: phone.trim(),
       join_date: joinDate ? format(joinDate, "yyyy-MM-dd") : null,
