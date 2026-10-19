@@ -20,6 +20,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           email: string | null
+          gym_id: string
           height: number | null
           id: string
           join_date: string | null
@@ -35,6 +36,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          gym_id: string
           height?: number | null
           id?: string
           join_date?: string | null
@@ -50,6 +52,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           email?: string | null
+          gym_id?: string
           height?: number | null
           id?: string
           join_date?: string | null
@@ -60,13 +63,22 @@ export type Database = {
           user_id?: string
           weight?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "admissions_gym_owner_fkey"
+            columns: ["gym_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id", "owner_id"]
+          },
+        ]
       }
       attendance: {
         Row: {
           admission_id: string
           check_in_date: string
           created_at: string
+          gym_id: string
           id: string
           notes: string | null
           user_id: string
@@ -75,6 +87,7 @@ export type Database = {
           admission_id: string
           check_in_date?: string
           created_at?: string
+          gym_id: string
           id?: string
           notes?: string | null
           user_id: string
@@ -83,6 +96,7 @@ export type Database = {
           admission_id?: string
           check_in_date?: string
           created_at?: string
+          gym_id?: string
           id?: string
           notes?: string | null
           user_id?: string
@@ -95,13 +109,45 @@ export type Database = {
             referencedRelation: "admissions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "attendance_gym_owner_fkey"
+            columns: ["gym_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id", "owner_id"]
+          },
         ]
+      }
+      gyms: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       payments: {
         Row: {
           admission_id: string
           amount: number
           created_at: string
+          gym_id: string
           id: string
           method: string
           notes: string | null
@@ -113,6 +159,7 @@ export type Database = {
           admission_id: string
           amount: number
           created_at?: string
+          gym_id: string
           id?: string
           method?: string
           notes?: string | null
@@ -124,6 +171,7 @@ export type Database = {
           admission_id?: string
           amount?: number
           created_at?: string
+          gym_id?: string
           id?: string
           method?: string
           notes?: string | null
@@ -138,6 +186,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "admissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_gym_owner_fkey"
+            columns: ["gym_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "gyms"
+            referencedColumns: ["id", "owner_id"]
           },
         ]
       }
