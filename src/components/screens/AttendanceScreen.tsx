@@ -16,10 +16,11 @@ interface Member {
 
 interface AttendanceScreenProps {
   userId: string;
+  gymId: string;
   onBack: () => void;
 }
 
-export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
+export function AttendanceScreen({ userId, gymId, onBack }: AttendanceScreenProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [presentIds, setPresentIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -34,11 +35,13 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
         .from("admissions")
         .select("id, name, phone, status")
         .eq("user_id", userId)
+        .eq("gym_id", gymId)
         .order("name"),
       supabase
         .from("attendance")
         .select("admission_id")
         .eq("user_id", userId)
+        .eq("gym_id", gymId)
         .eq("check_in_date", today),
     ]);
 
@@ -47,7 +50,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
       setPresentIds(new Set(attendanceRes.data.map((a) => a.admission_id)));
     }
     setLoading(false);
-  }, [userId, today]);
+  }, [userId, gymId, today]);
 
   useEffect(() => {
     fetchData();
@@ -62,7 +65,9 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
         .delete()
         .eq("admission_id", memberId)
         .eq("check_in_date", today)
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .eq("gym_id", gymId);
+
       if (error) {
         toast.error("Failed to remove attendance");
         return;
@@ -75,6 +80,7 @@ export function AttendanceScreen({ userId, onBack }: AttendanceScreenProps) {
     } else {
       const { error } = await supabase.from("attendance").insert({
         user_id: userId,
+        gym_id: gymId,
         admission_id: memberId,
         check_in_date: today,
       });

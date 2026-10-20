@@ -25,7 +25,7 @@ interface GymSwitcherProps {
   gyms: GymOption[];
   activeGymId: string;
   onSelect: (gymId: string) => void;
-  onCreate: (name: string) => Promise<void>;
+  onCreate: (name: string) => Promise<boolean>;
 }
 
 export function GymSwitcher({ gyms, activeGymId, onSelect, onCreate }: GymSwitcherProps) {
@@ -39,9 +39,11 @@ export function GymSwitcher({ gyms, activeGymId, onSelect, onCreate }: GymSwitch
     if (!trimmedName || saving) return;
     setSaving(true);
     try {
-      await onCreate(trimmedName);
-      setName("");
-      setCreateOpen(false);
+      const created = await onCreate(trimmedName);
+      if (created) {
+        setName("");
+        setCreateOpen(false);
+      }
     } finally {
       setSaving(false);
     }

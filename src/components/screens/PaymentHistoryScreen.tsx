@@ -32,6 +32,7 @@ interface Member {
 
 interface Props {
   userId: string;
+  gymId: string;
   onBack: () => void;
 }
 
@@ -58,7 +59,7 @@ function isCurrentOrFutureMonth(date: Date) {
     (date.getFullYear() === now.getFullYear() && date.getMonth() >= now.getMonth());
 }
 
-export function PaymentHistoryScreen({ userId, onBack }: Props) {
+export function PaymentHistoryScreen({ userId, gymId, onBack }: Props) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -79,6 +80,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
         .from("payments")
         .select("id, admission_id, amount, payment_date, method")
         .eq("user_id", userId)
+        .eq("gym_id", gymId)
         .gte("payment_date", bounds.start)
         .lt("payment_date", bounds.end)
         .order("payment_date", { ascending: false }),
@@ -86,9 +88,10 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
         .from("payments")
         .select("id, amount")
         .eq("user_id", userId)
+        .eq("gym_id", gymId)
         .gte("payment_date", prevBounds.start)
         .lt("payment_date", prevBounds.end),
-      supabase.from("admissions").select("id, name").eq("user_id", userId),
+      supabase.from("admissions").select("id, name").eq("user_id", userId).eq("gym_id", gymId),
     ]);
 
     setPayments((paymentRes.data as PaymentRecord[]) ?? []);
@@ -99,7 +102,7 @@ export function PaymentHistoryScreen({ userId, onBack }: Props) {
     });
     setMembers(memberMap);
     setLoading(false);
-  }, [userId, selectedMonth]);
+  }, [userId, gymId, selectedMonth]);
 
   useEffect(() => {
     loadData();

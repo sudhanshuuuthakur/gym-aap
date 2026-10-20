@@ -8,6 +8,7 @@ export default defineTool({
   description:
     "List the signed-in gym owner's members (admissions), optionally filtered by payment status or a name/phone search.",
   inputSchema: {
+    gym_id: z.string().uuid().describe("The gym ID whose members should be listed."),
     status: z
       .enum(["all", "paid", "unpaid"])
       .optional()
@@ -16,13 +17,14 @@ export default defineTool({
     limit: z.number().int().optional().describe("Max members to return (default 50)."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ status, search, limit }, ctx) => {
+  handler: async ({ gym_id, status, search, limit }, ctx) => {
     if (!ctx.isAuthenticated())
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const supabase = supabaseForUser(ctx);
     let query = supabase
       .from("admissions")
       .select("id, name, phone, status, join_date, age, height, weight, created_at")
+      .eq("gym_id", gym_id)
       .order("created_at", { ascending: false })
       .limit(Math.min(Math.max(limit ?? 50, 1), 200));
     if (status && status !== "all") query = query.eq("status", status);

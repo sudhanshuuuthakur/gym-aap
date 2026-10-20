@@ -28,11 +28,19 @@
         "inputSchema": {
           "type": "object",
           "properties": {
+            "gym_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The gym ID to summarize."
+            },
             "days": {
               "type": "integer",
               "description": "Window in days for revenue and attendance totals (default 30)."
             }
           },
+          "required": [
+            "gym_id"
+          ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
@@ -50,6 +58,11 @@
         "inputSchema": {
           "type": "object",
           "properties": {
+            "gym_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The gym ID whose members should be listed."
+            },
             "status": {
               "type": "string",
               "enum": [
@@ -68,6 +81,9 @@
               "description": "Max members to return (default 50)."
             }
           },
+          "required": [
+            "gym_id"
+          ],
           "additionalProperties": false,
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
@@ -85,6 +101,11 @@
         "inputSchema": {
           "type": "object",
           "properties": {
+            "gym_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The gym ID selected for this new member."
+            },
             "name": {
               "type": "string",
               "description": "Member full name."
@@ -111,6 +132,7 @@
             }
           },
           "required": [
+            "gym_id",
             "name",
             "phone"
           ],
@@ -131,6 +153,11 @@
         "inputSchema": {
           "type": "object",
           "properties": {
+            "gym_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The gym ID for this payment."
+            },
             "member_id": {
               "type": "string",
               "description": "The member's admission id (UUID) from list_members."
@@ -153,6 +180,7 @@
             }
           },
           "required": [
+            "gym_id",
             "member_id",
             "amount"
           ],
@@ -173,6 +201,11 @@
         "inputSchema": {
           "type": "object",
           "properties": {
+            "gym_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The gym ID for this check-in."
+            },
             "member_id": {
               "type": "string",
               "description": "The member's admission id (UUID) from list_members."
@@ -187,6 +220,7 @@
             }
           },
           "required": [
+            "gym_id",
             "member_id"
           ],
           "additionalProperties": false,

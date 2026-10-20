@@ -29,6 +29,8 @@ interface Profile {
 
 interface MemberListScreenProps {
   userId: string;
+  gymId: string;
+  gymName: string;
   filter: MemberFilter;
   onBack: () => void;
 }
@@ -39,7 +41,7 @@ const filterConfig = {
   notpaid: { title: "Unpaid Members", icon: Clock },
 };
 
-export function MemberListScreen({ userId, filter, onBack }: MemberListScreenProps) {
+export function MemberListScreen({ userId, gymId, gymName, filter, onBack }: MemberListScreenProps) {
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -60,16 +62,18 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
         .from("admissions")
         .select("id, name, status, phone")
         .eq("user_id", userId)
+        .eq("gym_id", gymId)
         .order("name"),
       (supabase as any)
         .from("payments")
         .select("admission_id, amount, payment_date")
+        .eq("gym_id", gymId)
         .eq("user_id", userId)
         .order("payment_date", { ascending: false }),
       supabase
         .from("profiles")
         .select("display_name, phone")
-        .eq("id", userId)
+        .eq("user_id", userId)
         .single(),
     ]).then(([memberRes, paymentRes, profileRes]) => {
       if (memberRes.data) setMembers(memberRes.data);
@@ -77,7 +81,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
       if (profileRes.data) setProfile(profileRes.data as Profile);
       setLoading(false);
     });
-  }, [userId]);
+  }, [userId, gymId]);
 
   const getLatestPayment = (memberId: string) => 
     payments.find((p) => p.admission_id === memberId);
@@ -242,7 +246,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
             const daysRemaining = getDaysRemaining(lastPayment);
             const expiryDate = getExpiryDate(lastPayment);
             const amount = lastPayment?.amount ?? 0;
-            const gymName = profile?.display_name || "Your Gym";
+            const currentGymName = gymName || "GYM NAME";
             const contactNumber = profile?.phone || "";
             return (
               <motion.div
@@ -281,7 +285,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                           phone: member.phone,
                           expiryDate,
                           amount,
-                          gymName,
+                          gymName: currentGymName,
                           ownerContact: contactNumber,
                         })
                       }
@@ -297,7 +301,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                           phone: member.phone,
                           expiryDate,
                           amount,
-                          gymName,
+                          gymName: currentGymName,
                           contactNumber,
                         })
                       }
@@ -314,7 +318,7 @@ export function MemberListScreen({ userId, filter, onBack }: MemberListScreenPro
                           phone: member.phone,
                           expiryDate,
                           amount,
-                          gymName,
+                          gymName: currentGymName,
                           contactNumber,
                         })
                       }

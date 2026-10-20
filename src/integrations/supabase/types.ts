@@ -116,6 +116,13 @@ export type Database = {
             referencedRelation: "gyms"
             referencedColumns: ["id", "owner_id"]
           },
+          {
+            foreignKeyName: "attendance_member_owner_gym_fkey"
+            columns: ["admission_id", "user_id", "gym_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id", "user_id", "gym_id"]
+          },
         ]
       }
       gyms: {
@@ -193,6 +200,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "gyms"
             referencedColumns: ["id", "owner_id"]
+          },
+          {
+            foreignKeyName: "payments_member_owner_gym_fkey"
+            columns: ["admission_id", "user_id", "gym_id"]
+            isOneToOne: false
+            referencedRelation: "admissions"
+            referencedColumns: ["id", "user_id", "gym_id"]
           },
         ]
       }

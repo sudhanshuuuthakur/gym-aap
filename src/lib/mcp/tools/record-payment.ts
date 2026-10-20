@@ -8,6 +8,7 @@ export default defineTool({
   description:
     "Record a membership payment for one of the signed-in gym owner's members and mark that member as paid.",
   inputSchema: {
+    gym_id: z.string().uuid().describe("The gym ID for this payment."),
     member_id: z.string().describe("The member's admission id (UUID) from list_members."),
     amount: z.number().describe("Payment amount collected."),
     method: z.string().optional().describe("Payment method, e.g. cash or upi. Defaults to cash."),
@@ -25,6 +26,7 @@ export default defineTool({
       .from("admissions")
       .select("id, name")
       .eq("id", input.member_id)
+      .eq("gym_id", input.gym_id)
       .maybeSingle();
     if (memberError)
       return { content: [{ type: "text", text: memberError.message }], isError: true };
@@ -35,6 +37,7 @@ export default defineTool({
       .from("payments")
       .insert({
         user_id: ctx.getUserId(),
+        gym_id: input.gym_id,
         admission_id: member.id,
         amount: input.amount,
         method: input.method ?? "cash",
@@ -45,7 +48,7 @@ export default defineTool({
       .single();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
 
-    await supabase.from("admissions").update({ status: "paid" }).eq("id", member.id);
+    await supabase.from("admissions").update({ status: "paid" }).eq("id", member.id).eq("gym_id", input.gym_id);
 
     return {
       content: [

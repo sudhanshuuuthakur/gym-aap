@@ -15,7 +15,7 @@ import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen"
 import type { Session } from "@supabase/supabase-js";
 import { GymSwitcher, type GymOption } from "@/components/GymSwitcher";
 import { ActiveGymProvider } from "@/lib/activeGym";
-import { DEFAULT_GYM_NAME, getActiveGymStorageKey } from "@/lib/gyms";
+import { DEFAULT_GYM_NAME, getActiveGymStorageKey, resolveActiveGym } from "@/lib/gyms";
 import { toast } from "sonner";
 
 interface DashboardProps {
@@ -90,7 +90,11 @@ export function Dashboard({ session }: DashboardProps) {
       setGyms(availableGyms);
       if (availableGyms.length) {
         const storedId = window.localStorage.getItem(getActiveGymStorageKey(session.user.id));
-        const selected = availableGyms.find((gym) => gym.id === storedId) ?? availableGyms[0];
+        const selected = resolveActiveGym(availableGyms, storedId);
+        if (!selected) {
+          setGymsLoading(false);
+          return;
+        }
         setActiveGymId(selected.id);
         window.localStorage.setItem(getActiveGymStorageKey(session.user.id), selected.id);
       }
@@ -120,7 +124,7 @@ export function Dashboard({ session }: DashboardProps) {
     setRefreshKey((key) => key + 1);
   };
 
-  const createGym = async (name: string) => {
+  const createGym = async (name: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from("gyms")
       .insert({ owner_id: session.user.id, name })
@@ -128,11 +132,12 @@ export function Dashboard({ session }: DashboardProps) {
       .single();
     if (error || !data) {
       toast.error("Could not create gym. Please try again.");
-      throw error ?? new Error("Gym was not created");
+      return false;
     }
     setGyms((current) => [...current, data]);
     selectGym(data.id);
     toast.success(`${data.name} created`);
+    return true;
   };
 
   const phone = session.user.user_metadata?.phone || "Owner";
@@ -181,11 +186,11 @@ export function Dashboard({ session }: DashboardProps) {
               />
             )}
             {screen === "member-list" && (
-              <MemberListScreen userId={session.user.id} gymId={activeGymId} filter={memberFilter} onBack={() => window.history.back()} />
+              <MemberListScreen userId={session.user.id} gymId={activeGymId} gymName={gyms.find((gym) => gym.id === activeGymId)?.name || DEFAULT_GYM_NAME} filter={memberFilter} onBack={() => window.history.back()} />
             )}
             {screen === "attendance" && <AttendanceScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
             {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
-            {screen === "members" && <MembersScreen userId={session.user.id} gymId={activeGymId} />}
+            {screen === "members" && <MembersScreen userId={session.user.id} gymId={activeGymId} gymName={gyms.find((gym) => gym.id === activeGymId)?.name || DEFAULT_GYM_NAME} />}
             {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
           </motion.div>
         </AnimatePresence>
@@ -199,7 +204,6 @@ export function Dashboard({ session }: DashboardProps) {
         open={editOpen}
         onOpenChange={setEditOpen}
         userId={session.user.id}
-        gymId={activeGymId ?? ""}
         currentDisplayName={displayName}
         currentPhone={profilePhone || phone}
         currentAvatarPath={avatarPath}
@@ -215,6 +219,7 @@ export function Dashboard({ session }: DashboardProps) {
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
         userId={session.user.id}
+        gymId={activeGymId ?? ""}
         onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>

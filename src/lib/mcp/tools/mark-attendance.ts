@@ -7,6 +7,7 @@ export default defineTool({
   title: "Mark member attendance",
   description: "Check a member in for a given day (defaults to today) for the signed-in gym owner.",
   inputSchema: {
+    gym_id: z.string().uuid().describe("The gym ID for this check-in."),
     member_id: z.string().describe("The member's admission id (UUID) from list_members."),
     check_in_date: z.string().optional().describe("Check-in date as YYYY-MM-DD. Defaults to today."),
     notes: z.string().optional().describe("Optional note for this check-in."),
@@ -20,6 +21,7 @@ export default defineTool({
       .from("attendance")
       .insert({
         user_id: ctx.getUserId(),
+        gym_id: input.gym_id,
         admission_id: input.member_id,
         check_in_date: input.check_in_date ?? new Date().toISOString().slice(0, 10),
         notes: input.notes ?? null,

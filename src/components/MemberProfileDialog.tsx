@@ -25,6 +25,7 @@ interface MemberProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   member: Member | null;
+  gymId: string;
 }
 
 interface Payment {
@@ -38,7 +39,7 @@ interface Attendance {
   check_in_date: string;
 }
 
-export function MemberProfileDialog({ open, onOpenChange, member }: MemberProfileDialogProps) {
+export function MemberProfileDialog({ open, onOpenChange, member, gymId }: MemberProfileDialogProps) {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
 
@@ -49,19 +50,21 @@ export function MemberProfileDialog({ open, onOpenChange, member }: MemberProfil
         .from("payments")
         .select("id, amount, payment_date")
         .eq("admission_id", member.id)
+        .eq("gym_id", gymId)
         .order("payment_date", { ascending: false })
         .limit(5),
       (supabase as any)
         .from("attendance")
         .select("id, check_in_date")
         .eq("admission_id", member.id)
+        .eq("gym_id", gymId)
         .order("check_in_date", { ascending: false })
         .limit(5),
     ]).then(([p, a]) => {
       if (p.data) setPayments(p.data);
       if (a.data) setAttendance(a.data);
     });
-  }, [member, open]);
+  }, [member, open, gymId]);
 
   if (!member) return null;
 
