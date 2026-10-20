@@ -185,7 +185,7 @@ export function Dashboard({ session }: DashboardProps) {
             )}
             {screen === "attendance" && <AttendanceScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
             {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
-            {screen === "members" && <MembersScreen userId={session.user.id} gymId={activeGymId} />}
+            {screen === "members" && <MembersScreen userId={session.user.id} gymId={activeGymId} gymName={gyms.find((gym) => gym.id === activeGymId)?.name || DEFAULT_GYM_NAME} />}
             {screen === "info" && <InfoScreen greeting={greeting} onEditProfile={() => setEditOpen(true)} />}
           </motion.div>
         </AnimatePresence>

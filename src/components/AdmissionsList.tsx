@@ -47,9 +47,10 @@ interface Admission {
 interface AdmissionsListProps {
   userId: string;
   gymId: string;
+  gymName: string;
 }
 
-export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
+export function AdmissionsList({ userId, gymId, gymName }: AdmissionsListProps) {
   const [admissions, setAdmissions] = useState<Admission[]>([]);
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
@@ -58,7 +59,6 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
   const [deleting, setDeleting] = useState<Admission | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [messaging, setMessaging] = useState<Admission | null>(null);
-  const [gymName, setGymName] = useState("");
   const [filter, setFilter] = useState<MembersFilter>("all");
   const [payments, setPayments] = useState<MemberPayment[]>([]);
   const [photoMember, setPhotoMember] = useState<Admission | null>(null);
@@ -66,18 +66,13 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
   const [loadError, setLoadError] = useState(false);
 
   const fetchAdmissions = useCallback(async () => {
-    const [memberRes, profileRes, paymentRes] = await Promise.all([
+    const [memberRes, paymentRes] = await Promise.all([
       supabase
         .from("admissions")
         .select("id, name, email, phone, status, created_at, join_date, age, height, weight, avatar_url")
         .eq("user_id", userId)
         .eq("gym_id", gymId)
         .order("created_at", { ascending: false }),
-      supabase
-        .from("profiles")
-        .select("display_name")
-        .eq("user_id", userId)
-        .single(),
       supabase.from("payments").select("admission_id, payment_date").eq("user_id", userId).eq("gym_id", gymId),
     ]);
     if (memberRes.error || paymentRes.error) {
@@ -88,7 +83,6 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
     setLoadError(false);
     setAdmissions((memberRes.data as Admission[]) || []);
     setPayments(paymentRes.data || []);
-    if (profileRes.data) setGymName((profileRes.data as { display_name: string | null }).display_name || "");
     setLoading(false);
   }, [userId, gymId]);
 
