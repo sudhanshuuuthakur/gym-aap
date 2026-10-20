@@ -254,12 +254,13 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
       </div>
 
       {createPortal(<div className="pointer-events-none fixed inset-x-0 bottom-[calc(6.5rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-5xl justify-end px-6"><Button size="icon" aria-label="Add member" title="Add member" onClick={() => setAddOpen(true)} className="pointer-events-auto h-14 w-14 rounded-full shadow-lg [&_svg]:size-7"><Plus /></Button></div>, document.body)}
-      <MemberPhotoDialog member={photoMember} userId={userId} photoUrl={photoMember?.avatar_url ? photoUrls[photoMember.avatar_url] : undefined} onClose={() => setPhotoMember(null)} onSaved={fetchAdmissions} />
+      <MemberPhotoDialog member={photoMember} userId={userId} gymId={gymId} photoUrl={photoMember?.avatar_url ? photoUrls[photoMember.avatar_url] : undefined} onClose={() => setPhotoMember(null)} onSaved={fetchAdmissions} />
 
       <AddAdmissionDialog
         open={addOpen}
         onOpenChange={setAddOpen}
         userId={userId}
+        gymId={gymId}
         gymId={gymId}
         onAdded={fetchAdmissions}
       />
@@ -268,6 +269,7 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
         open={!!editing}
         onOpenChange={(o) => !o && setEditing(null)}
         member={editing}
+        gymId={gymId}
         onUpdated={fetchAdmissions}
       />
 
@@ -275,6 +277,7 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
         open={!!viewing}
         onOpenChange={(o) => !o && setViewing(null)}
         member={viewing}
+        gymId={gymId}
       />
 
       <SendMessageDialog

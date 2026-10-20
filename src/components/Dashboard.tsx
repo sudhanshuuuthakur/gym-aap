@@ -181,7 +181,7 @@ export function Dashboard({ session }: DashboardProps) {
               />
             )}
             {screen === "member-list" && (
-              <MemberListScreen userId={session.user.id} gymId={activeGymId} filter={memberFilter} onBack={() => window.history.back()} />
+              <MemberListScreen userId={session.user.id} gymId={activeGymId} gymName={gyms.find((gym) => gym.id === activeGymId)?.name || DEFAULT_GYM_NAME} filter={memberFilter} onBack={() => window.history.back()} />
             )}
             {screen === "attendance" && <AttendanceScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
             {screen === "collect-payment" && <CollectPaymentScreen userId={session.user.id} gymId={activeGymId} onBack={() => window.history.back()} />}
@@ -199,7 +199,6 @@ export function Dashboard({ session }: DashboardProps) {
         open={editOpen}
         onOpenChange={setEditOpen}
         userId={session.user.id}
-        gymId={activeGymId ?? ""}
         currentDisplayName={displayName}
         currentPhone={profilePhone || phone}
         currentAvatarPath={avatarPath}
@@ -215,6 +214,7 @@ export function Dashboard({ session }: DashboardProps) {
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
         userId={session.user.id}
+        gymId={activeGymId ?? ""}
         onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>

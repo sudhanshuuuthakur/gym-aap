@@ -28,10 +28,11 @@ interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   member: Member | null;
+  gymId: string;
   onUpdated: () => void;
 }
 
-export function EditMemberDialog({ open, onOpenChange, member, onUpdated }: EditMemberDialogProps) {
+export function EditMemberDialog({ open, onOpenChange, member, gymId, onUpdated }: EditMemberDialogProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -73,7 +74,8 @@ export function EditMemberDialog({ open, onOpenChange, member, onUpdated }: Edit
         height: height ? parseFloat(height) : null,
         weight: weight ? parseFloat(weight) : null,
       })
-      .eq("id", member.id);
+      .eq("id", member.id)
+      .eq("gym_id", gymId);
     setLoading(false);
 
     if (error) {
