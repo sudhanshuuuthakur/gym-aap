@@ -120,7 +120,7 @@ export function Dashboard({ session }: DashboardProps) {
     setRefreshKey((key) => key + 1);
   };
 
-  const createGym = async (name: string) => {
+  const createGym = async (name: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from("gyms")
       .insert({ owner_id: session.user.id, name })
@@ -128,11 +128,12 @@ export function Dashboard({ session }: DashboardProps) {
       .single();
     if (error || !data) {
       toast.error("Could not create gym. Please try again.");
-      throw error ?? new Error("Gym was not created");
+      return false;
     }
     setGyms((current) => [...current, data]);
     selectGym(data.id);
     toast.success(`${data.name} created`);
+    return true;
   };
 
   const phone = session.user.user_metadata?.phone || "Owner";
@@ -214,6 +215,7 @@ export function Dashboard({ session }: DashboardProps) {
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
         userId={session.user.id}
+        gymId={activeGymId ?? ""}
         onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>
