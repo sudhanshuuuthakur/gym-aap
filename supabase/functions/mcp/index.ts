@@ -68,16 +68,17 @@ var list_members_default = defineTool({
   title: "List gym members",
   description: "List the signed-in gym owner's members (admissions), optionally filtered by payment status or a name/phone search.",
   inputSchema: {
+    gym_id: z.string().uuid().describe("The gym ID whose members should be listed."),
     status: z.enum(["all", "paid", "unpaid"]).optional().describe("Filter by membership payment status. Defaults to all."),
     search: z.string().optional().describe("Match against member name or phone."),
     limit: z.number().int().optional().describe("Max members to return (default 50).")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ status, search, limit }, ctx) => {
+  handler: async ({ gym_id, status, search, limit }, ctx) => {
     if (!ctx.isAuthenticated())
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const supabase = supabaseForUser(ctx);
-    let query = supabase.from("admissions").select("id, name, phone, status, join_date, age, height, weight, created_at").order("created_at", { ascending: false }).limit(Math.min(Math.max(limit ?? 50, 1), 200));
+    let query = supabase.from("admissions").select("id, name, phone, status, join_date, age, height, weight, created_at").eq("gym_id", gym_id).order("created_at", { ascending: false }).limit(Math.min(Math.max(limit ?? 50, 1), 200));
     if (status && status !== "all") query = query.eq("status", status);
     if (search?.trim())
       query = query.or(`name.ilike.%${search.trim()}%,phone.ilike.%${search.trim()}%`);
@@ -98,6 +99,7 @@ var add_member_default = defineTool2({
   title: "Add gym member",
   description: "Register a new gym member (admission) for the signed-in gym owner. Name and phone are required.",
   inputSchema: {
+    gym_id: z2.string().uuid().describe("The gym ID selected for this new member."),
     name: z2.string().describe("Member full name."),
     phone: z2.string().describe("10-digit phone number."),
     join_date: z2.string().optional().describe("Date of joining as YYYY-MM-DD."),
@@ -120,6 +122,7 @@ var add_member_default = defineTool2({
     const supabase = supabaseForUser(ctx);
     const { data, error } = await supabase.from("admissions").insert({
       user_id: ctx.getUserId(),
+      gym_id: input.gym_id,
       name,
       phone,
       join_date: input.join_date ?? (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
@@ -143,6 +146,7 @@ var record_payment_default = defineTool3({
   title: "Record membership payment",
   description: "Record a membership payment for one of the signed-in gym owner's members and mark that member as paid.",
   inputSchema: {
+    gym_id: z3.string().uuid().describe("The gym ID for this payment."),
     member_id: z3.string().describe("The member's admission id (UUID) from list_members."),
     amount: z3.number().describe("Payment amount collected."),
     method: z3.string().optional().describe("Payment method, e.g. cash or upi. Defaults to cash."),
@@ -156,13 +160,14 @@ var record_payment_default = defineTool3({
     if (!(input.amount > 0))
       return { content: [{ type: "text", text: "Amount must be greater than 0" }], isError: true };
     const supabase = supabaseForUser(ctx);
-    const { data: member, error: memberError } = await supabase.from("admissions").select("id, name").eq("id", input.member_id).maybeSingle();
+    const { data: member, error: memberError } = await supabase.from("admissions").select("id, name").eq("id", input.member_id).eq("gym_id", input.gym_id).maybeSingle();
     if (memberError)
       return { content: [{ type: "text", text: memberError.message }], isError: true };
     if (!member)
       return { content: [{ type: "text", text: "Member not found" }], isError: true };
     const { data, error } = await supabase.from("payments").insert({
       user_id: ctx.getUserId(),
+      gym_id: input.gym_id,
       admission_id: member.id,
       amount: input.amount,
       method: input.method ?? "cash",
@@ -170,7 +175,7 @@ var record_payment_default = defineTool3({
       notes: input.notes ?? null
     }).select().single();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    await supabase.from("admissions").update({ status: "paid" }).eq("id", member.id);
+    await supabase.from("admissions").update({ status: "paid" }).eq("id", member.id).eq("gym_id", input.gym_id);
     return {
       content: [
         { type: "text", text: `Recorded ${input.amount} for ${member.name} and marked as paid.` }
@@ -188,6 +193,7 @@ var mark_attendance_default = defineTool4({
   title: "Mark member attendance",
   description: "Check a member in for a given day (defaults to today) for the signed-in gym owner.",
   inputSchema: {
+    gym_id: z4.string().uuid().describe("The gym ID for this check-in."),
     member_id: z4.string().describe("The member's admission id (UUID) from list_members."),
     check_in_date: z4.string().optional().describe("Check-in date as YYYY-MM-DD. Defaults to today."),
     notes: z4.string().optional().describe("Optional note for this check-in.")
@@ -199,6 +205,7 @@ var mark_attendance_default = defineTool4({
     const supabase = supabaseForUser(ctx);
     const { data, error } = await supabase.from("attendance").insert({
       user_id: ctx.getUserId(),
+      gym_id: input.gym_id,
       admission_id: input.member_id,
       check_in_date: input.check_in_date ?? (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
       notes: input.notes ?? null
@@ -219,19 +226,20 @@ var gym_summary_default = defineTool5({
   title: "Gym overview summary",
   description: "Summarize the signed-in gym owner's gym: total members, paid vs unpaid counts, revenue collected, and check-ins over a recent window.",
   inputSchema: {
+    gym_id: z5.string().uuid().describe("The gym ID to summarize."),
     days: z5.number().int().optional().describe("Window in days for revenue and attendance totals (default 30).")
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ days }, ctx) => {
+  handler: async ({ gym_id, days }, ctx) => {
     if (!ctx.isAuthenticated())
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const window = Math.min(Math.max(days ?? 30, 1), 365);
     const since = new Date(Date.now() - window * 864e5).toISOString().slice(0, 10);
     const supabase = supabaseForUser(ctx);
     const [members, payments, checkIns] = await Promise.all([
-      supabase.from("admissions").select("id, status"),
-      supabase.from("payments").select("amount, payment_date").gte("payment_date", since),
-      supabase.from("attendance").select("id, check_in_date").gte("check_in_date", since)
+      supabase.from("admissions").select("id, status").eq("gym_id", gym_id),
+      supabase.from("payments").select("amount, payment_date").eq("gym_id", gym_id).gte("payment_date", since),
+      supabase.from("attendance").select("id, check_in_date").eq("gym_id", gym_id).gte("check_in_date", since)
     ]);
     const firstError = members.error ?? payments.error ?? checkIns.error;
     if (firstError)

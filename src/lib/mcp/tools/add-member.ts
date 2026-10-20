@@ -8,6 +8,7 @@ export default defineTool({
   description:
     "Register a new gym member (admission) for the signed-in gym owner. Name and phone are required.",
   inputSchema: {
+    gym_id: z.string().uuid().describe("The gym ID selected for this new member."),
     name: z.string().describe("Member full name."),
     phone: z.string().describe("10-digit phone number."),
     join_date: z.string().optional().describe("Date of joining as YYYY-MM-DD."),
@@ -32,6 +33,7 @@ export default defineTool({
       .from("admissions")
       .insert({
         user_id: ctx.getUserId(),
+        gym_id: input.gym_id,
         name,
         phone,
         join_date: input.join_date ?? new Date().toISOString().slice(0, 10),

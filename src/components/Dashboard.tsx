@@ -15,7 +15,7 @@ import { CollectPaymentScreen } from "@/components/screens/CollectPaymentScreen"
 import type { Session } from "@supabase/supabase-js";
 import { GymSwitcher, type GymOption } from "@/components/GymSwitcher";
 import { ActiveGymProvider } from "@/lib/activeGym";
-import { DEFAULT_GYM_NAME, getActiveGymStorageKey } from "@/lib/gyms";
+import { DEFAULT_GYM_NAME, getActiveGymStorageKey, resolveActiveGym } from "@/lib/gyms";
 import { toast } from "sonner";
 
 interface DashboardProps {
@@ -90,7 +90,11 @@ export function Dashboard({ session }: DashboardProps) {
       setGyms(availableGyms);
       if (availableGyms.length) {
         const storedId = window.localStorage.getItem(getActiveGymStorageKey(session.user.id));
-        const selected = availableGyms.find((gym) => gym.id === storedId) ?? availableGyms[0];
+        const selected = resolveActiveGym(availableGyms, storedId);
+        if (!selected) {
+          setGymsLoading(false);
+          return;
+        }
         setActiveGymId(selected.id);
         window.localStorage.setItem(getActiveGymStorageKey(session.user.id), selected.id);
       }

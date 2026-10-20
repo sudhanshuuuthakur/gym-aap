@@ -8,6 +8,7 @@ export default defineTool({
   description:
     "Summarize the signed-in gym owner's gym: total members, paid vs unpaid counts, revenue collected, and check-ins over a recent window.",
   inputSchema: {
+    gym_id: z.string().uuid().describe("The gym ID to summarize."),
     days: z
       .number()
       .int()
@@ -15,7 +16,7 @@ export default defineTool({
       .describe("Window in days for revenue and attendance totals (default 30)."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ days }, ctx) => {
+  handler: async ({ gym_id, days }, ctx) => {
     if (!ctx.isAuthenticated())
       return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const window = Math.min(Math.max(days ?? 30, 1), 365);
@@ -23,9 +24,9 @@ export default defineTool({
     const supabase = supabaseForUser(ctx);
 
     const [members, payments, checkIns] = await Promise.all([
-      supabase.from("admissions").select("id, status"),
-      supabase.from("payments").select("amount, payment_date").gte("payment_date", since),
-      supabase.from("attendance").select("id, check_in_date").gte("check_in_date", since),
+      supabase.from("admissions").select("id, status").eq("gym_id", gym_id),
+      supabase.from("payments").select("amount, payment_date").eq("gym_id", gym_id).gte("payment_date", since),
+      supabase.from("attendance").select("id, check_in_date").eq("gym_id", gym_id).gte("check_in_date", since),
     ]);
 
     const firstError = members.error ?? payments.error ?? checkIns.error;
