@@ -261,7 +261,6 @@ export function AdmissionsList({ userId, gymId }: AdmissionsListProps) {
         onOpenChange={setAddOpen}
         userId={userId}
         gymId={gymId}
-        gymId={gymId}
         onAdded={fetchAdmissions}
       />
 

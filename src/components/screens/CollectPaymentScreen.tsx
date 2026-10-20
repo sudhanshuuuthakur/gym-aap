@@ -33,10 +33,11 @@ interface Payment {
 
 interface Props {
   userId: string;
+  gymId: string;
   onBack: () => void;
 }
 
-export function CollectPaymentScreen({ userId, onBack }: Props) {
+export function CollectPaymentScreen({ userId, gymId, onBack }: Props) {
   const [members, setMembers] = useState<Member[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,8 +61,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   const loadData = async () => {
     setLoading(true);
     const [m, p] = await Promise.all([
-      supabase.from("admissions").select("id, name, phone, status, avatar_url").eq("user_id", userId).order("name"),
-      (supabase as any).from("payments").select("id, admission_id, amount, payment_date, method").eq("user_id", userId).order("payment_date", { ascending: false }),
+      supabase.from("admissions").select("id, name, phone, status, avatar_url").eq("user_id", userId).eq("gym_id", gymId).order("name"),
+      (supabase as any).from("payments").select("id, admission_id, amount, payment_date, method").eq("user_id", userId).eq("gym_id", gymId).order("payment_date", { ascending: false }),
     ]);
     if (m.data) setMembers(m.data);
     if (p.data) setPayments(p.data as Payment[]);
@@ -70,7 +71,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
 
   useEffect(() => {
     loadData();
-  }, [userId]);
+  }, [userId, gymId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -160,7 +161,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       .from("payments")
       .delete()
       .in("id", paymentIds)
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .eq("gym_id", gymId);
     if (error) {
       toast.error(error.message);
       setDeletingPayments(false);
@@ -190,7 +192,8 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       .from("payments")
       .update({ amount, payment_date })
       .eq("id", payment.id)
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .eq("gym_id", gymId);
     if (error) {
       toast.error(error.message);
       setUpdatingPaymentId(null);
@@ -216,6 +219,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
     setSavingId(member.id);
     const { error } = await (supabase as any).from("payments").insert({
       user_id: userId,
+      gym_id: gymId,
       admission_id: member.id,
       amount,
       payment_date: isoDate,
@@ -227,7 +231,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
       return;
     }
     if (member.status !== "approved") {
-      await supabase.from("admissions").update({ status: "approved" }).eq("id", member.id);
+      await supabase.from("admissions").update({ status: "approved" }).eq("id", member.id).eq("user_id", userId).eq("gym_id", gymId);
     }
     const dateLabel = selectedDate ? ` on ${format(selectedDate, "d/M/yyyy")}` : "";
     toast.success(
@@ -243,7 +247,7 @@ export function CollectPaymentScreen({ userId, onBack }: Props) {
   };
 
   if (showHistory) {
-    return <PaymentHistoryScreen userId={userId} onBack={() => setShowHistory(false)} />;
+    return <PaymentHistoryScreen userId={userId} gymId={gymId} onBack={() => setShowHistory(false)} />;
   }
 
   const memberPayments = memberHistory

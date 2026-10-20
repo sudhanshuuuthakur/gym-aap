@@ -65,8 +65,9 @@ export function AttendanceScreen({ userId, gymId, onBack }: AttendanceScreenProp
         .delete()
         .eq("admission_id", memberId)
         .eq("check_in_date", today)
-        .eq("user_id", userId);
-      
+        .eq("user_id", userId)
+        .eq("gym_id", gymId);
+
       if (error) {
         toast.error("Failed to remove attendance");
         return;

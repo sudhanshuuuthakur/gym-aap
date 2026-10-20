@@ -214,7 +214,6 @@ export function Dashboard({ session }: DashboardProps) {
         open={addMemberOpen}
         onOpenChange={setAddMemberOpen}
         userId={session.user.id}
-        gymId={activeGymId ?? ""}
         onAdded={() => setRefreshKey((k) => k + 1)}
       />
     </div>
