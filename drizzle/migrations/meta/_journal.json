@@ -15,6 +15,13 @@
       "when": 1792408201647,
       "tag": "0001_add_multi_gym_ownership",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792482959990,
+      "tag": "0002_enforce_member_gym_consistency",
+      "breakpoints": true
     }
   ]
 }

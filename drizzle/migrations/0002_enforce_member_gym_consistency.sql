@@ -1,0 +1,3 @@
+ALTER TABLE public.admissions ADD CONSTRAINT admissions_id_owner_gym_key UNIQUE (id, user_id, gym_id);
+ALTER TABLE public.payments ADD CONSTRAINT payments_member_owner_gym_fkey FOREIGN KEY (admission_id, user_id, gym_id) REFERENCES public.admissions (id, user_id, gym_id);
+ALTER TABLE public.attendance ADD CONSTRAINT attendance_member_owner_gym_fkey FOREIGN KEY (admission_id, user_id, gym_id) REFERENCES public.admissions (id, user_id, gym_id);
