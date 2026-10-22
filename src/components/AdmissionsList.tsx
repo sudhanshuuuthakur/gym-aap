@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { useActiveGymId } from "@/lib/activeGym";
 
 interface Admission {
   id: string;
@@ -51,6 +52,7 @@ interface AdmissionsListProps {
 }
 
 export function AdmissionsList({ userId, gymId, gymName }: AdmissionsListProps) {
+  const activeGymId = useActiveGymId();
   const [admissions, setAdmissions] = useState<Admission[]>([]);
   const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
