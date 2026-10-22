@@ -8,7 +8,7 @@
 - [x] Add a camera "Take photo" option when adding member and profile photos.
 
 ## Multiple gyms
-- [ ] Add owner-managed gyms and a header selector with “GYM NAME” as the initial gym.
-- [ ] Keep existing records with the initial gym; make newly created gyms start empty.
-- [ ] Scope member, payment, attendance, overview, and message flows to the selected gym.
+- [x] Add owner-managed gyms and a header selector with “GYM NAME” as the initial gym.
+- [x] Keep existing records with the initial gym; make newly created gyms start empty.
+- [x] Scope member, payment, attendance, overview, and message flows to the selected gym.
 - [ ] Verify switching gyms and creating a gym on mobile.
