@@ -262,19 +262,42 @@ var gym_summary_default = defineTool5({
   }
 });
 
+// src/lib/mcp/tools/list-gyms.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.26.1";
+var list_gyms_default = defineTool6({
+  name: "list_gyms",
+  title: "List gyms",
+  description: "List the signed-in gym owner's locations so a specific gym can be selected for other tools.",
+  inputSchema: {},
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async (_input, ctx) => {
+    if (!ctx.isAuthenticated())
+      return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
+    const supabase = supabaseForUser(ctx);
+    const { data, error } = await supabase.from("gyms").select("id, name").order("created_at", { ascending: true }).limit(100);
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    const gyms = (data ?? []).map(({ id, name }) => ({ id, name }));
+    return {
+      content: [{ type: "text", text: JSON.stringify(gyms, null, 2) }],
+      structuredContent: { gyms, count: gyms.length }
+    };
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "cyyaltxyfuqrzhxtsnbt";
 var mcp_default = defineMcp({
   name: "gym-aap",
   title: "gym aap",
   version: "0.1.0",
-  instructions: "Tools for a gym owner's management app. Use `gym_summary` for an overview of members, revenue and check-ins; `list_members` to find members and their paid/unpaid status; `add_member` to register a new member; `record_payment` to collect a membership payment; `mark_attendance` to check a member in. All tools act as the signed-in gym owner and only see that owner's data.",
+  instructions: "Tools for a gym owner's management app. Use `list_gyms` to choose a location, then use `gym_summary` for an overview of its members, revenue and check-ins; `list_members` to find members and their paid/unpaid status; `add_member` to register a new member; `record_payment` to collect a membership payment; `mark_attendance` to check a member in. All tools act as the signed-in gym owner and only see that owner's data.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
   tools: [
     gym_summary_default,
+    list_gyms_default,
     list_members_default,
     add_member_default,
     record_payment_default,
